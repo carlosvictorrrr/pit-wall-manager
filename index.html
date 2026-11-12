@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pit Wall Manager</title>
+<style>
+:root{--bg:#f4f4f2;--sf:#fff;--tx:#15171a;--mu:#666;--bd:#d8d8d4;--ac:#d6001c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1114;--sf:#1a1d21;--tx:#eee;--mu:#9aa0a6;--bd:#2e3238;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#0f1114;--sf:#1a1d21;--tx:#eee;--mu:#9aa0a6;--bd:#2e3238;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,Segoe UI,Arial,sans-serif;line-height:1.4}
+main{max-width:980px;margin:0 auto;padding:16px}
+h1,h2,h3{margin:.4em 0}
+button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--sf);color:var(--tx);padding:10px 16px;border-radius:8px}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+button:disabled{opacity:.4;cursor:default}
+input,select{font:inherit;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);color:var(--tx);max-width:100%}
+.hero{text-align:center;padding:40px 10px}
+.car{width:min(520px,100%);margin:10px auto}
+.menu{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:20px auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.team{border-radius:10px;padding:12px;cursor:pointer;border:3px solid transparent}
+.team.sel{border-color:var(--tx)}
+.team small{opacity:.85}
+.row{display:flex;justify-content:space-between;gap:8px;margin:3px 0}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:14px;margin:10px 0}
+.lv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.lv label{display:block;border:2px solid var(--bd);border-radius:10px;padding:10px;cursor:pointer;background:var(--sf)}
+.lv input{display:none}.lv input:checked+div{color:var(--ac);font-weight:600}
+.lv label:has(input:checked){border-color:var(--ac)}
+.f{font-size:1.2em}.cc{font-size:.7em;opacity:.7;margin-left:2px}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}td,th{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:left}
+.mu{color:var(--mu)}
+.bar{height:8px;background:var(--bd);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac)}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+nav button.on{background:var(--tx);color:var(--bg)}
+table.t td,table.t th{padding:3px 5px;font-size:.85em;white-space:nowrap}
+html:root:root{--bg:#eef1f5;--sf:#fff;--tx:#14181f;--mu:#667085;--bd:#dde2ea;--ac:#e10600;color-scheme:light}
+button{font-weight:600}button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.bx{background:#fff;color:#14181f;border-radius:12px;box-shadow:0 1px 4px #0002;margin:10px 0;overflow:hidden}.bx>h4{margin:0;background:var(--tc,#14181f);color:var(--tf,#fff);padding:8px 12px;font-size:.9em;letter-spacing:.05em;text-transform:uppercase}.bx>.in{padding:10px 12px}
+@keyframes bl{50%{opacity:.35}}.pit{display:inline-block;background:#f5c400;color:#000;border-radius:6px;padding:0 6px;margin-left:4px;font-weight:700;animation:bl .6s infinite}
+table.t th{background:var(--tc,#14181f);color:var(--tf,#fff)}
+body{background:linear-gradient(180deg,color-mix(in srgb,var(--tc,#14181f) 30%,var(--bg)) 0,var(--bg) 340px) no-repeat var(--bg)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.mb{display:flex;flex-wrap:wrap;gap:2px;background:#14181f;padding:4px;border-radius:10px;border-bottom:4px solid var(--tc,#14181f)}.mb button{background:transparent;color:#fff;border:0;padding:7px 11px}
+.dk{background:#0b0d10;color:#fff;border:1px solid #fff;font-weight:700;padding:13px 18px;border-radius:6px}.dk:disabled{background:#8a8f98;opacity:1}
+.big{background:#0b0d10;color:#fff;border:1px solid #fff;font-weight:800;font-style:italic;padding:24px 12px;border-radius:6px;font-size:1.05em;width:100%}.big:hover{background:var(--ac)}
+.chub{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;max-width:640px;margin:20px auto}
+.lst{max-height:340px;overflow:auto;border:1px solid var(--bd);background:#fff;color:#14181f;border-radius:6px}
+table.lt{border-collapse:collapse;width:100%}table.lt th{position:sticky;top:0;background:#e8ebf0;color:#14181f;font-size:.85em;padding:6px 8px;text-align:center;white-space:nowrap}table.lt td{padding:5px 8px;font-size:.9em;white-space:nowrap;border-bottom:1px solid #eef0f3}
+.lst tr{cursor:pointer}.lst tr.sel td{background:#1e6fd9;color:#fff}
+.cbt{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:12px 0}
+.ed{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.ed label{display:block;font-size:.85em}.ed input,.ed select{width:100%}.ed input[type=color]{height:38px;padding:2px;cursor:pointer}
+body[data-bg]{background:linear-gradient(rgba(8,10,14,.18),rgba(8,10,14,.45)) center/cover fixed no-repeat,var(--img) center/cover fixed no-repeat #0f1114!important;color:#fff}body[data-bg] .mu,body[data-bg] #ch{color:#d5d9df}body[data-bg] .bx,body[data-bg] .card,body[data-bg] .team{color:var(--tx)}body[data-bg] .bx .mu,body[data-bg] .card .mu{color:var(--mu)}body[data-bg] .team{color:inherit}body[data-bg] h1{color:#fff;text-shadow:0 2px 12px #000a}body[data-bg=menu] .hero h1{color:#fff}
+</style></head><body><main id="app"></main>
+<script>
+const FL=c=>String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt()));
+const flag=c=>`<span class="f">${FL(c)}</span><span class="cc">${c}</span>`;
+const M=n=>"US$ "+(n/1e6).toFixed(1).replace(".",",")+" mi";
+const ENG={mer:["Mercedes","GB"],fer:["Ferrari","IT"],hon:["Honda","JP"],rbf:["Red Bull Ford","AT"],aud:["Audi","DE"],ren:["Renault","FR"]};
+const T=(n,c,bg,fg,e,d)=>({n,c,bg,fg,e,d:d.map(x=>({n:x[0],c:x[1],r:x[2]}))});
+const SEASONS={
+2026:[
+T("Mercedes","GB","#00d2be","#06201d","mer",[["George Russell","GB",8.9],["Kimi Antonelli","IT",8.0]]),
+T("Ferrari","IT","#dc0000","#fff","fer",[["Charles Leclerc","MC",9.2],["Lewis Hamilton","GB",9.0]]),
+T("McLaren","GB","#ff8000","#1a0d00","mer",[["Lando Norris","GB",9.2],["Oscar Piastri","AU",9.0]]),
+T("Red Bull","AT","#1e41ff","#fff","rbf",[["Max Verstappen","NL",9.8],["Isack Hadjar","FR",7.4]]),
+T("Williams","GB","#005aff","#fff","mer",[["Alex Albon","TH",8.0],["Carlos Sainz","ES",8.3]]),
+T("Aston Martin","GB","#006f62","#fff","hon",[["Fernando Alonso","ES",8.6],["Lance Stroll","CA",6.9]]),
+T("Alpine","FR","#0093cc","#fff","mer",[["Pierre Gasly","FR",7.8],["Franco Colapinto","AR",7.1]]),
+T("Haas","US","#b6babd","#111","fer",[["Esteban Ocon","FR",7.5],["Oliver Bearman","GB",7.5]]),
+T("Racing Bulls","IT","#6692ff","#0a1633","rbf",[["Liam Lawson","NZ",7.2],["Arvid Lindblad","GB",6.8]]),
+T("Audi","DE","#8a8d93","#fff","aud",[["Nico Hülkenberg","DE",7.7],["Gabriel Bortoleto","BR",7.3]]),
+T("Cadillac","US","#1c1c1e","#fff","fer",[["Sergio Pérez","MX",7.3],["Valtteri Bottas","FI",7.2]])],
+2025:[
+T("McLaren","GB","#ff8000","#1a0d00","mer",[["Lando Norris","GB",9.2],["Oscar Piastri","AU",9.0]]),
+T("Ferrari","IT","#dc0000","#fff","fer",[["Charles Leclerc","MC",9.2],["Lewis Hamilton","GB",8.9]]),
+T("Red Bull","AT","#1e41ff","#fff","hon",[["Max Verstappen","NL",9.8],["Yuki Tsunoda","JP",7.6]]),
+T("Mercedes","GB","#00d2be","#06201d","mer",[["George Russell","GB",8.9],["Kimi Antonelli","IT",7.9]]),
+T("Williams","GB","#005aff","#fff","mer",[["Alex Albon","TH",8.0],["Carlos Sainz","ES",8.3]]),
+T("Aston Martin","GB","#006f62","#fff","mer",[["Fernando Alonso","ES",8.6],["Lance Stroll","CA",6.9]]),
+T("Racing Bulls","IT","#6692ff","#0a1633","hon",[["Liam Lawson","NZ",7.2],["Isack Hadjar","FR",7.4]]),
+T("Haas","US","#b6babd","#111","fer",[["Esteban Ocon","FR",7.5],["Oliver Bearman","GB",7.5]]),
+T("Alpine","FR","#0093cc","#fff","ren",[["Pierre Gasly","FR",7.8],["Franco Colapinto","AR",7.1]]),
+T("Sauber","CH","#52e252","#062006","fer",[["Nico Hülkenberg","DE",7.7],["Gabriel Bortoleto","BR",7.3]])]};
+ENG.mer[2]=1;
+const CASH=[20,18,15,12,10,10,10,10,8,8,8,8,8,8].map(x=>x*2e6);
+const LV={gar:["Garagista","Pouco dinheiro, mas com grandes ambições.",5e6],med:["Média","Instalações e preparo inicial, aporte baixo a médio, torcida pequena.",8e6],gra:["Marca conhecida","Já correu na F1 ou em outras categorias. Aporte médio a alto, sem brigar por títulos de cara. Pode ser fabricante de motores.",12e6],ric:["Equipe rica","O dinheiro compra moral. Aporte alto, nunca acima das 3 mais ricas da temporada. Pode ser fabricante de motores.",15e6]};
+const CTRY={AR:"Argentina",AU:"Austrália",AT:"Áustria",BE:"Bélgica",BR:"Brasil",CA:"Canadá",CL:"Chile",CN:"China",CO:"Colômbia",DK:"Dinamarca",FI:"Finlândia",FR:"França",DE:"Alemanha",GB:"Reino Unido",HU:"Hungria",IN:"Índia",ID:"Indonésia",IT:"Itália",JP:"Japão",MX:"México",MC:"Mônaco",NL:"Países Baixos",NZ:"Nova Zelândia",NO:"Noruega",PL:"Polônia",PT:"Portugal",QA:"Catar",SA:"Arábia Saudita",SG:"Singapura",ZA:"África do Sul",KR:"Coreia do Sul",ES:"Espanha",SE:"Suécia",CH:"Suíça",TH:"Tailândia",AE:"Emirados Árabes",US:"Estados Unidos",UY:"Uruguai",VE:"Venezuela"};
+const SAVE="pwm_save_v1";
+let S={screen:"menu",season:null,pick:null,boss:"",nt:{lv:"gar",mot:false,pw:70,name:"",cc:"BR",c1:"#d6001c",c2:"#ffffff",rep:0},g:null,tab:"resumo"};
+const $=s=>document.querySelector(s),app=$("#app");
+function save(){try{localStorage.setItem(SAVE,JSON.stringify(S.g))}catch(e){}}
+function load(){try{return JSON.parse(localStorage.getItem(SAVE))}catch(e){return null}}
+function go(s){S.screen=s;draw()}
+function tcard(t,i,sel){return `<div class="team ${sel?"sel":""}" style="background:${t.bg};color:${t.fg}" onclick="S.pick=${i};draw()">
+<div class="row"><b>${t.n}</b><span>${flag(t.c)}</span></div>
+${t.d.map(d=>`<div class="row"><span>${flag(d.c)} ${d.n}</span><b>${d.r.toFixed(1).replace(".",",")}</b></div>`).join("")}
+<small>Motor: ${(ENG[t.e]||['—',''])[0]}${t.w?' (fabricante)':''} ${ENG[t.e]?flag(ENG[t.e][1]):''}</small></div>`}
+function draw(){
+const f={menu:vMenu,season:vSeason,team:vTeam,newteam:vNew,manage:vDash,cust:vCust,wk:vWk,car:vCar,mkt:vMkt,cal:vCal,mot:vMot,drv:vDrv,hof:vHof,ret:vRet,pil:vPil}[S.screen];app.innerHTML=f();document.documentElement.style.setProperty('--tc',S.g?S.g.team.bg:'#14181f');document.documentElement.style.setProperty('--tf',S.g?S.g.team.fg:'#fff')}
+function vMenu(){const has=!!load();return `<div class="hero"><h1>Pit Wall Manager</h1>
+<svg class="car" viewBox="0 0 520 140" role="img" aria-label="Silhueta de carro de F1"><g fill="currentColor"><rect x="20" y="96" width="480" height="8" rx="4"/><path d="M60 92 L150 70 L300 64 L430 74 L490 70 L490 92Z"/><circle cx="130" cy="98" r="26"/><circle cx="400" cy="98" r="28"/><rect x="440" y="38" width="62" height="10" rx="3"/><rect x="14" y="60" width="40" height="8" rx="3"/></g><circle cx="130" cy="98" r="10" fill="var(--bg)"/><circle cx="400" cy="98" r="11" fill="var(--bg)"/></svg>
+<div class="menu"><button class="p" onclick="go('season')">Novo jogo</button>
+<button ${has?"":"disabled"} onclick="S.g=load();if(S.g.car){S.g.grid[S.g.ti]=S.g.team;if(S.g.cal)CAL.splice(0,CAL.length,...S.g.cal);S.screen='manage';draw()}else alert('Save antigo: inicie um novo jogo.')">Carregar jogo</button>
+<button onclick="S.cs='hub';go('cust')">Customizar</button></div></div>`}
+function vSeason(){return `<h2>Escolha a temporada</h2><p class="mu">Cada temporada define o número de equipes no grid.</p>
+<div class="grid">${Object.keys(SEASONS).sort((a,b)=>b-a).map(y=>`<button style="padding:24px" onclick="S.season=${y};S.pick=null;go('team')"><b style="font-size:1.6em">${y}</b><br>${SEASONS[y].length} equipes</button>`).join("")}</div>
+<p><button onclick="go('menu')">Voltar</button></p>`}
+function vTeam(){const ts=SEASONS[S.season];const t=ts[S.pick];
+return `<h2>Temporada ${S.season}: escolha sua equipe</h2>
+<div class="grid">${ts.map((x,i)=>tcard(x,i,S.pick===i)).join("")}</div>
+<div class="card"><label>Nome do chefe de equipe<br><input id="boss" maxlength="30" value="${S.boss}" oninput="S.boss=this.value.replace(/[^A-Za-zÀ-ÿ ]/g,'');"></label></div>
+<p><button onclick="go('season')">Voltar</button>
+<button class="p" ${S.pick===null?"disabled":""} onclick="start(false)">Assumir ${t?t.n:"equipe"}</button>
+<button ${S.pick===null?"disabled":""} onclick="go('newteam')">Criar equipe nova no lugar de ${t?t.n:"..."}</button></p>
+${S.pick===null?'<p class="mu">Selecione uma equipe: ela será assumida ou substituída pela sua.</p>':""}`}
+function vNew(){const n=S.nt,t=SEASONS[S.season][S.pick],big=n.lv=="gra"||n.lv=="ric";
+return `<h2>Nova equipe no lugar da ${t.n}</h2>
+<div class="lv">${Object.entries(LV).map(([k,v])=>`<label><input type="radio" name="lv" ${n.lv==k?"checked":""} onchange="S.nt.lv='${k}';if(!(k=='gra'||k=='ric'))S.nt.mot=false;draw()"><div>${v[0]} · ${M(v[2]*2)}</div><small class="mu">${v[1]}</small></label>`).join("")}</div>
+${big?`<div class="card"><label><input type="checkbox" ${n.mot?"checked":""} onchange="S.nt.mot=this.checked;draw()"> Ser fabricante de motores (o motor terá o nome da equipe)</label>
+${n.mot&&n.lv=="gra"?`<div style="margin-top:8px">Potência inicial: <b>${n.pw}%</b><br><input type="range" min="65" max="80" value="${n.pw}" oninput="S.nt.pw=+this.value;this.previousElementSibling.previousElementSibling.textContent=this.value+'%'"></div>`:""}</div>`:""}
+<div class="card"><label>Nome da equipe (até 30 caracteres, letras e números)<br><input id="tn" maxlength="30" value="${n.name}" oninput="S.nt.name=this.value.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'');if(this.value!==S.nt.name)this.value=S.nt.name"></label>
+<p><label>País<br><select onchange="S.nt.cc=this.value">${Object.entries(CTRY).sort((a,b)=>a[1].localeCompare(b[1])).map(([c,nm])=>`<option value="${c}" ${n.cc==c?"selected":""}>${FL(c)} ${nm}</option>`).join("")}</select></label></p>
+<p>Cores: <input type="color" value="${n.c1}" onchange="S.nt.c1=this.value;draw()"> <input type="color" value="${n.c2}" onchange="S.nt.c2=this.value;draw()">
+<span class="team" style="display:inline-block;background:${n.c1};color:${n.c2};padding:6px 12px">${n.name||"Sua equipe"} ${flag(n.cc)}</span></p></div>
+<p><button onclick="go('team')">Voltar</button> <button class="p" onclick="start(true)">Fundar equipe</button></p>`}
+function start(isNew){
+const ts=SEASONS[S.season],i=S.pick,o=ts[i],n=S.nt,boss=(S.boss||"").trim();if(!boss){alert("Digite o nome do chefe de equipe.");return}
+let team;
+if(isNew){if(!n.name.trim()){alert("Digite o nome da equipe.");return}
+const eng=n.mot?[n.name.trim(),n.cc,n.lv=="gra"?n.pw:70]:null;
+team={n:n.name.trim(),c:n.cc,bg:n.c1,fg:n.c2,eng:eng?eng[0]:"Cliente (a definir)",engc:eng?eng[1]:null,mot:!!eng,pw:eng?eng[2]:null,d:o.d.map(cl),cash:LV[n.lv][2]*2,s:{gar:4,med:5,gra:6,ric:7.5}[n.lv],lv:LV[n.lv][0]};
+}else team={n:o.n,c:o.c,bg:o.bg,fg:o.fg,eng:ENG[o.e][0],engc:ENG[o.e][1],mot:false,pw:null,d:o.d.map(cl),cash:CASH[Math.min(i,CASH.length-1)],s:o.s,lv:"Equipe existente"};
+const goals=i<4?["Vencer o campeonato de construtores","Marcar 3 poles"]:i<8?["Terminar no top 5 dos construtores","Conquistar um pódio"]:["Terminar fora das 3 últimas posições","Marcar pontos em 5 corridas"];
+S.g={season:S.season,boss,team,goal:goals[Math.floor(Math.random()*goals.length)],round:1,spon:[],gastos:0,pts:{},cpts:{},ti:i,grid:ts.map((x,k)=>k==i?team:{...x,d:x.d.map(cl),car:Object.fromEntries(CARK.map(([q])=>[q,(x.cr&&x.cr[q])||clamp(x.s+rnd(-.3,.3),3,10)]))}),car:Object.fromEntries(CARK.map(([k])=>[k,(o.cr&&o.cr[k])||clamp(team.s+rnd(-.3,.3),3,10)])),inv:Object.fromEntries(CARK.map(([k])=>[k,3e4])),lim:25e4,pool:poolFor(S.season),news:[],hist:[],rev:0,sp:[],off:[],rec:{t:0,p:0,w:0,dt:0},old:[],eng:engInit(team),mc:isNew?(team.mot?{k:'own',yrs:99,mfg:true}:{k:o.e,yrs:1}):{k:o.e,yrs:1,mfg:!!o.w}};
+initG(S.g,o);CAL.splice(0,CAL.length,...clone(SCAL[S.season]||CC));Object.assign(S.g,{dbl:!!S.dbl,hf:hfSeed(),cal:clone(CAL),rules:{p:[...ptsFor(S.season)]}});save();S.tab="resumo";S.screen="manage";draw()}
+function vManage(){const g=S.g,t=g.team;
+const tabs={resumo:"Resumo",gp:"Corrida",camp:"Campeonato",pilotos:"Pilotos",fin:"Finanças",carro:"Carro e motor"};
+let body=S.tab=="gp"?vGp():S.tab=="camp"?vCamp():"";
+if(S.tab=="resumo")body=`<div class="card" style="background:${t.bg};color:${t.fg}"><h3>${t.n} ${flag(t.c)}</h3>
+<div class="row"><span>Chefe de equipe</span><b>${g.boss}</b></div><div class="row"><span>Categoria</span><b>${t.lv}</b></div>
+<div class="row"><span>Motor</span><b>${t.eng}${t.engc?" "+flag(t.engc):""}${t.mot?" (fabricante"+(t.pw?", "+t.pw+"%":"")+")":""}</b></div></div>
+<div class="card"><b>Objetivo da temporada ${g.season}</b><p>${g.goal}</p></div>
+<div class="card"><b>Próxima etapa</b><p class="mu">Calendário, treinos, classificação e corrida entram na próxima etapa do desenvolvimento.</p></div>`;
+if(S.tab=="pilotos")body=`<div class="card wrap"><table><tr><th>Função</th><th>Piloto</th><th>Nota</th></tr>${t.d.map((d,i)=>`<tr><td>${i+1}º piloto</td><td>${flag(d.c)} ${d.n}</td><td>${d.r.toFixed(1).replace(".",",")}</td></tr>`).join("")}<tr><td>Testes</td><td class="mu" colspan="2">A contratar no mercado de pilotos</td></tr></table></div>`;
+if(S.tab=="fin")body=`<div class="card"><div class="row"><span>Caixa</span><b>${M(t.cash)}</b></div><div class="row"><span>Receitas</span><b>${M(0)}</b></div><div class="row"><span>Despesas</span><b>${M(g.gastos)}</b></div><p class="mu">Patrocínios (até 3) e salários entram com a simulação da temporada.</p></div>`;
+if(S.tab=="carro")body=`<div class="card">${["Aerodinâmica","Caixa de câmbio","Freios","Sistema elétrico","Direção","Confiabilidade","Chassi"].map(a=>{const v=5;return `<div class="row"><span>${a}</span><b>${v.toFixed(1).replace(".",",")}</b></div><div class="bar"><i style="width:${v*10}%"></i></div>`}).join("")}<p class="mu">Valores provisórios. Investimento por etapa (10 mil a 250 mil) vem em seguida.</p></div>`;
+return `<h2>${t.n}</h2><nav>${Object.entries(tabs).map(([k,v])=>`<button class="${S.tab==k?"on":""}" onclick="S.tab='${k}';draw()">${v}</button>`).join("")}</nav>${body}
+<p><button onclick="save();alert('Jogo salvo neste navegador.')">Salvar</button> <button onclick="go('menu')">Menu</button></p>`}
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,isNaN(v)?a:v));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+for(const y in SEASONS)SEASONS[y].forEach((t,i)=>t.s=+(9.5-i*.55).toFixed(1));
+try{const c=JSON.parse(localStorage.getItem('pwm_x0'));if(c){for(const k in c.S)SEASONS[k]=c.S[k];for(const k in c.E)ENG[k]=c.E[k]}}catch(e){}
+const CAL='Austrália|Albert Park|AU|58|0;China|Xangai|CN|56|0;Japão|Suzuka|JP|53|0;Bahrein|Sakhir|BH|57|1;Arábia Saudita|Jidá|SA|50|1;Miami|Miami|US|57|0;Canadá|Gilles Villeneuve|CA|70|0;Mônaco|Monte Carlo|MC|78|0;Espanha|Barcelona|ES|66|0;Áustria|Red Bull Ring|AT|71|0;Grã-Bretanha|Silverstone|GB|52|0;Bélgica|Spa|BE|44|0;Hungria|Hungaroring|HU|70|0;Países Baixos|Zandvoort|NL|72|0;Itália|Monza|IT|53|0;Madri|Madring|ES|57|0;Azerbaijão|Baku|AZ|51|0;Singapura|Marina Bay|SG|62|0;EUA|Austin|US|56|0;México|Hermanos Rodríguez|MX|71|0;Brasil|Interlagos|BR|71|0;Las Vegas|Las Vegas|US|50|0;Catar|Lusail|QA|57|1;Abu Dhabi|Yas Marina|AE|58|1'.split(';').map(x=>{const a=x.split('|');return{gp:a[0],c:a[1],cc:a[2],l:+a[3],dry:+a[4]}});
+const TY={S:['Macio','#e10600',16],M:['Médio','#f5c400',25],H:['Duro','#bbb',33],I:['Inter','#1db954',30],W:['Chuva','#1e78ff',30]};
+const WX=['Seco','Úmida','Chuva'],AB=[['c','Curvas'],['m','Misto'],['r','Retas']];
+const tyOpts=s=>Object.entries(TY).map(([c,v])=>`<option value="${c}" ${s==c?'selected':''}>${v[0]} (${v[2]})</option>`).join('');
+const aeroSel=a=>`<select onchange="S.g.wk.aero=this.value">${AB.map(o=>`<option value="${o[0]}" ${a==o[0]?'selected':''}>${o[1]}</option>`).join('')}</select>`;
+const lf=(c,t)=>TY[c.cp][2];
+const ord=R=>R.cars.slice().sort((a,b)=>a.dnf-b.dnf||(a.dnf?b.dl-a.dl:a.tot-b.tot));
+const perf=(t,d,x)=>d.r*.6+t.s*.4+(x||0);
+let CY=2026,TM;
+function saveCust(){try{localStorage.setItem('pwm_custom',JSON.stringify({S:SEASONS,E:ENG}));alert('Salvo.')}catch(e){alert('Não foi possível salvar.')}}
+function vCust(){const ts=SEASONS[CY];
+return `<h2>Customizar</h2><p class="mu">Ajuste nomes, cores, força das equipes e notas dos pilotos. Vale para novos jogos.</p>
+<p>Temporada: <select onchange="CY=+this.value;draw()">${Object.keys(SEASONS).map(y=>`<option ${y==CY?'selected':''}>${y}</option>`).join('')}</select></p>
+${ts.map((t,i)=>`<div class="card"><div class="row" style="flex-wrap:wrap"><input value="${t.n}" maxlength="30" onchange="SEASONS[CY][${i}].n=this.value.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'')||'Equipe'"><input type="color" value="${t.bg}" onchange="SEASONS[CY][${i}].bg=this.value"><input type="color" value="${t.fg}" onchange="SEASONS[CY][${i}].fg=this.value"><label>Força <input type="number" min="3" max="10" step=".1" value="${t.s}" style="width:70px" onchange="SEASONS[CY][${i}].s=clamp(+this.value,3,10)"></label></div>${t.d.map((d,j)=>`<div class="row"><span>${flag(d.c)} ${d.n}</span><input type="number" min="1" max="10" step=".1" value="${d.r}" style="width:70px" onchange="SEASONS[CY][${i}].d[${j}].r=clamp(+this.value,1,10)"></div>`).join('')}</div>`).join('')}
+<div class="card"><b>Motores</b>${Object.keys(ENG).map(k=>`<div class="row"><span>${flag(ENG[k][1])}</span><input value="${ENG[k][0]}" maxlength="30" onchange="ENG['${k}'][0]=this.value"></div>`).join('')}</div>
+<p><button onclick="go('menu')">Voltar</button> <button class="p" onclick="saveCust()">Salvar</button> <button onclick="if(confirm('Restaurar padrões?')){try{localStorage.removeItem('pwm_custom');localStorage.removeItem('pwm_custom2')}catch(e){}location.reload()}">Restaurar</button></p>`}
+function vGp(){const g=S.g;if(g.round>CAL.length)return '<div class="card">Temporada encerrada. Veja o Campeonato.</div>';const r=CAL[g.round-1];
+return `<div class="card"><b>Etapa ${g.round}: GP ${r.gp}</b><p>${r.c} · ${flag(r.cc)} · ${r.l} voltas</p><button class="p" onclick="newWk()">Iniciar fim de semana</button></div>`}
+function vCamp(){const g=S.g;if(!g.grid)return '';const all=g.grid.flatMap(t=>t.d.map(d=>[d.n,g.pts[d.n]||0,t.n])).sort((a,b)=>b[1]-a[1]);const cs=g.grid.map(t=>[t.n,g.cpts[t.n]||0]).sort((a,b)=>b[1]-a[1]);
+return `<div class="card wrap"><b>Pilotos</b><table class="t">${all.map((x,i)=>`<tr><td>${i+1}</td><td>${x[0]}</td><td>${x[2]}</td><td>${x[1]}</td></tr>`).join('')}</table></div><div class="card wrap"><b>Construtores</b><table class="t">${cs.map((x,i)=>`<tr><td>${i+1}</td><td>${x[0]}</td><td>${x[1]}</td></tr>`).join('')}</table></div>`}
+function newWk(){const g=S.g;if(!g.grid){alert('Save antigo: inicie um novo jogo.');return}const r=CAL[g.round-1];
+g.wk={ph:'tr1',r,wx:r.dry?0:[0,0,0,1,2][Math.floor(rnd(0,5))],temp:r.dry?[1,2][Math.floor(rnd(0,2))]:[0,0,1,2][Math.floor(rnd(0,4))],bias:r.rt>=58?'r':r.rt<=42?'c':'m',mood:g.team.d.map(d=>d.m||.5),log:[],tyre:'M',aero:'m',q:null,rt:g.team.d.map(()=>'M'),auto:true,pa:[true,true],sp:1,qsp:2};go('wk')}
+function doPractice(){const g=S.g,w=g.wk;const ok=(w.wx==0?'SMH':w.wx==1?'I':'W').includes(w.tyre);const fit=w.aero==w.bias?1:w.aero=='m'?0:-1;
+const out=g.team.d.map((d,i)=>{const dm=(ok?.08:-.1)+fit*.06+rnd(-.05,.05);w.mood[i]=clamp(w.mood[i]+dm,0,1);return `${d.n}: ${dm>.05?'ótima sessão (moral sobe)':dm>0?'sessão boa':'sessão ruim (moral cai)'}`});
+w.log.push(`<b>Treino ${w.ph=='tr1'?1:2}</b><br>${out.join('<br>')}`);w.ph=w.ph=='tr1'?'tr2':'q';draw()}
+function doQuali(){const g=S.g,w=g.wk,out=[];
+g.grid.forEach((t,k)=>t.d.forEach((d,j)=>{const me=k==g.ti;out.push({ti:k,j,t,d,sc:perf(t,d,me?(w.mood[j]-.5)*.8+(w.aero==w.bias?.1:0):0)+rnd(-.9,.9)})}));
+out.sort((a,b)=>b.sc-a.sc);w.q=out;w.ph='qr';draw()}
+function startRace(){const g=S.g,w=g.wk,r=w.r;
+const cars=w.q.map((x,i)=>{const me=x.ti==g.ti;return{ti:x.ti,j:x.j,n:x.d.n,tn:x.t.n,cc:x.d.c,bg:x.t.bg,fg:x.t.fg,ex:at(x.d,'ex'),r:x.d.r,p:perf(x.t,x.d,me?(w.mood[x.j]-.5)*.4+(w.aero==w.bias?.05:0)+(ep(g)-7)*.08:0),cp:me?w.rt[x.j]:(w.wx==0?(i<10?'S':'M'):w.wx==1?'I':'W'),age:0,stops:0,tot:i*.35,last:0,dnf:false,pit:null,forced:0}});
+const ev=[];if(Math.random()<.3){const n=Math.random()<.3?2:1;for(let e=0;e<n;e++)ev.push({lap:Math.floor(rnd(3,r.l-3)),car:Math.floor(rnd(0,cars.length)),t:['asa','furo','quebra','batida'][Math.floor(rnd(0,4))]})}
+cars.forEach((c,idx)=>{const s=w.q[idx].t.s,p=s<5?.6:s<8?.3:.15;if(Math.random()<p)ev.push({lap:Math.floor(rnd(3,r.l-3)),car:idx,t:'quebra'})});w.race={cars,lap:0,l:r.l,wx:w.wx,ev,msg:[],sched:mkSched(r.l,w.wx,r.dry)};w.paused=false;w.ph='race';draw();loop()}
+function loop(){clearInterval(TM);const w=S.g.wk;TM=setInterval(()=>{if(S.screen!='wk'||w.ph!='race')return clearInterval(TM);if(w.paused)return;stepLap();if(w.ph=='race'){const e=document.getElementById('rc');if(e)e.innerHTML=raceHtml();const k=document.getElementById('tk');if(k)k.innerHTML=trk(w)}},1000/w.sp)}
+function boxe(i){const g=S.g,c=g.wk.race.cars.find(c=>c.ti==g.ti&&c.j==i);if(c&&!c.dnf){c.pit=document.getElementById('nt'+i).value;toast('🔧 Boxe solicitado: '+c.n+' entra na próxima volta ('+TY[c.pit][0]+')',1);const e=document.getElementById('rc');if(e)e.innerHTML=raceHtml()}}
+function nextTy(wx,c){return wx==1?'I':wx==2?'W':({S:'M',M:'H',H:'M'}[c.cp]||'M')}
+function stepLap(){const g=S.g,w=g.wk,R=w.race,r=w.r;R.lap++;
+{const n=R.sched[R.lap];if(n!=null&&n!=R.wx){R.wx=n;R.msg.unshift(`Volta ${R.lap}: clima mudou para ${WX[n]}`)}}
+R.ev.filter(e=>e.lap==R.lap).forEach(e=>{const c=R.cars[e.car];if(c.dnf)return;
+if(e.t=='quebra'||e.t=='batida'){c.dnf=true;c.dl=R.lap;c.why=e.t=='quebra'?'Quebra mecânica':'Batida';R.msg.unshift(`Volta ${R.lap}: ${c.n} abandona (${e.t})`);if(c.ti==g.ti){g.team.cash-=1e5;g.gastos+=1e5}}
+else{c.pit=c.pit||nextTy(R.wx,c);c.forced=1;R.msg.unshift(`Volta ${R.lap}: ${c.n} vai ao box (${e.t=='asa'?'asa danificada':'pneu furado'})`)}});
+R.cars.forEach(c=>{if(c.dnf)return;const L=lf(c,w.temp);
+const mis=(R.wx==0?{S:0,M:0,H:0,I:4,W:7}:R.wx==1?{S:4,M:4,H:4,I:0,W:2}:{S:8,M:8,H:8,I:2.5,W:0})[c.cp];
+if(!c.pit&&(c.ti!=g.ti||w.sim)&&(c.age>=L-2||mis>=4))c.pit=nextTy(R.wx,c);
+const over=c.age-L,allow=c.ex>=8?5:c.ex>5?3:1;
+if(!c.pit&&over>allow){c.pit=nextTy(R.wx,c);c.forced=1;R.msg.unshift(`Volta ${R.lap}: ${c.n} estourou o pneu`)}
+const cd={S:-.6,M:0,H:c.age>L*.3?-.1:.5,I:0,W:0}[c.cp];
+let t=(r.bt||90)+(10-c.p)*.45+cd+mis+Math.max(0,over)*.35+c.age/L*.8+rnd(-.25,.25);
+if(c.pit){t+=22+(c.forced?6:0);c.cp=c.pit;c.age=0;c.warned=0;c.ip=3;R.msg.unshift('Volta '+R.lap+': 🔧 '+c.n+' parou nos boxes ('+TY[c.cp][0]+')');c.stops++;c.pit=null;c.forced=0}else c.age++;if(c.ti==g.ti&&!w.sim&&w.pa[c.j]&&!c.pit&&!c.dnf){const L2=lf(c,w.temp),m2=({0:{S:0,M:0,H:0,I:4,W:7},1:{S:4,M:4,H:4,I:0,W:2},2:{S:8,M:8,H:8,I:2.5,W:0}})[R.wx][c.cp],rem=R.l-R.lap;if(rem>1&&c.wl!=R.lap&&R.lap>=(c.nw||0)&&((c.age>=L2-2&&c.age+rem>L2)||m2>=4)){c.wl=R.lap;pitAlert(c)}}
+c.last=t;c.tot+=t;if(c.ip>0)c.ip--});
+if(R.lap>=R.l)finish()}
+function finish(){clearInterval(TM);if(window._pm){window._pm.remove();window._pm=null}if(S.g.wk)S.g.wk.paused=false;const g=S.g,w=g.wk,o=ord(w.race),P=(g.rules&&g.rules.p)||PTS,mu=(g.dbl&&g.round==CAL.length)?2:1;
+o.forEach((c,i)=>{if(!c.dnf&&P[i]){g.pts[c.n]=(g.pts[c.n]||0)+P[i]*mu;g.cpts[c.tn]=(g.cpts[c.tn]||0)+P[i]*mu}});
+w.res=o.map((c,i)=>({n:c.n,tn:c.tn,dnf:c.dnf,bg:c.bg,fg:c.fg,ti:c.ti,cc:c.cc,pt:(!c.dnf)?(P[i]||0)*mu:0}));g.hist.push({w:o[0].n,pos:Object.fromEntries(o.map((c,i)=>[c.n,c.dnf?'DNF':i+1]))});
+let cost=0;ensureInv(g);const tr=g.team.t?g.team.t.r:5;CARK.forEach(([k])=>{const v=g.inv[k],m=mt(g.car[k],g.lim),pv=g.pinv[k];let d=(v-m)/m*.30+(v-pv)/m*.25;if(d>0)d*=(1+(tr-5)*.06)*Math.max(.2,(10.5-g.car[k])/5);d=clamp(d,-.8,.8);g.pinv[k]=v;cost+=v;g.car[k]=clamp(g.car[k]+d,3,10)});cost+=engDev(g);
+cost+=[...g.team.d,g.team.t].filter(Boolean).reduce((a,d)=>a+(d.sal||0),0)/CAL.length;
+g.team.cash-=cost;g.gastos+=cost;g.lastc=cost;const s=CARK.reduce((a,[k])=>a+g.car[k],0)/7;g.team.s=s;g.grid[g.ti].s=s;
+g.news.unshift(`GP ${w.r.gp}: vitória de ${o[0].n}`);const win=o[0].ti==g.ti,pole=w.q[0].ti==g.ti;if(win)g.rec.w++;if(pole)g.rec.p++;let inc=0;g.sp.forEach(s=>{inc+=s.v/CAL.length+(win?s.bw:0)+(pole?s.bp:0)});g.team.cash+=inc;g.rev+=inc;g.lasti=inc;evolve(g,o);hofUp(g,o,w);aiOffers(g);g.grid.forEach((t,k)=>{if(k!=g.ti&&t.car){CARK.forEach(([q])=>{t.car[q]=clamp(t.car[q]+rnd(-.07,.09),3,10)});t.s=CARK.reduce((a,[q])=>a+t.car[q],0)/7}});if(g.team.cash<0)toast('⚠️ Caixa negativo! Cuidado com a falência: corte custos.',0);g.round++;if(g.round==2||Math.random()<.3)mkOffer(g);w.ph='end';save();draw()}
+function raceHtml(){const g=S.g,w=g.wk,R=w.race,o=ord(R),f=o[0].tot;
+return `<p>${Object.keys(TY).map(c=>tyre(c,20)+' '+TY[c][0]).join(' &nbsp; ')}</p><p><b>Volta ${Math.min(R.lap,R.l)}/${R.l}</b> · ${WX[R.wx]}</p><p class="mu">${R.cars.filter(c=>c.ti==g.ti&&!c.dnf).map(c=>`${c.n}: troca ideal em ~${Math.max(0,lf(c,w.temp)-2-c.age)} voltas`).join(' · ')}</p><div class="wrap"><table class="t"><tr><th>P</th><th>Piloto</th><th>Últ.</th><th>Frente</th><th>Atrás</th><th>Líder</th><th>Pneu</th><th>Pit</th><th>Desgaste</th></tr>${o.map((c,i)=>{const a=o[i-1],b=o[i+1];
+return `<tr style="${c.ti==g.ti?'font-weight:700;background:'+c.bg+';color:'+c.fg:''}"><td style="border-left:8px solid ${c.bg}">${i+1}</td><td><i style="display:inline-block;width:10px;height:10px;border-radius:5px;background:${c.bg}"></i> ${c.n}</td>${c.dnf?'<td colspan="7">ABANDONOU</td>':`<td>${c.last?c.last.toFixed(1):'-'}</td><td>${a?'+'+(c.tot-a.tot).toFixed(1):'-'}</td><td>${b&&!b.dnf?'-'+(b.tot-c.tot).toFixed(1):'-'}</td><td>${i?'+'+(c.tot-f).toFixed(1):'-'}</td><td>${tyre(c.cp)} ${TY[c.cp][0]}</td><td>${c.stops}</td><td><div class="bar" style="width:60px"><i style="width:${Math.min(100,c.age/lf(c,w.temp)*100)}%"></i></div></td>`}</tr>`}).join('')}</table></div><div class="mu">${R.msg.slice(0,5).join('<br>')}</div>`}
+function vWk(){const g=S.g,w=g.wk,r=w.r,T0=g.team;
+const head=`<h2>GP ${r.gp} ${flag(r.cc)}</h2><p class="mu">${r.c} · ${r.l} voltas · Pista: ${WX[w.wx]}${w.temp==1?' quente':w.temp==2?' muito quente':''} · Traçado favorece ${{c:'curvas',r:'retas',m:'equilíbrio'}[w.bias]}</p>`;
+if(w.ph=='tr1'||w.ph=='tr2')return head+`<div class="card"><b>Treino livre ${w.ph=='tr1'?1:2}</b><p>Pneu: <select onchange="S.g.wk.tyre=this.value">${tyOpts(w.tyre)}</select> Acerto: ${aeroSel(w.aero)}</p><button class="p" onclick="doPractice()">Rodar sessão</button></div>${w.log.map(l=>`<div class="card">${l}</div>`).join('')}`;
+if(w.ph=='q')return head+`<div class="card"><b>Classificação (25 min)</b><p class="mu">Peso: 60% piloto, 40% carro. Moral e acerto também contam.</p><p>Acerto: ${aeroSel(w.aero)}</p><button class="p" onclick="doQuali()">Iniciar classificação</button></div>`;
+if(w.ph=='qr')return head+`<div class="card wrap"><b>Grid de largada</b><table class="t">${w.q.map((x,i)=>`<tr><td>${i+1}</td><td><i style="display:inline-block;width:10px;height:10px;background:${x.t.bg}"></i> ${x.d.n}</td><td>${x.t.n}</td></tr>`).join('')}</table></div><button class="p" onclick="S.g.wk.ph='setup';draw()">Preparar corrida</button>`;
+if(w.ph=='setup')return head+`<div class="card"><b>Preparação da corrida</b>${T0.d.map((d,i)=>`<p>${d.n} (largada ${w.q.findIndex(x=>x.ti==g.ti&&x.j==i)+1}º): <select onchange="S.g.wk.rt[${i}]=this.value">${tyOpts(w.rt[i])}</select></p>`).join('')}<p>Acerto: ${aeroSel(w.aero)}</p><button class="p" onclick="startRace()">Largar</button></div>`;
+if(w.ph=='race')return head+`<div class="card">Velocidade <select onchange="S.g.wk.sp=+this.value;loop()">${[1,2,5,10,20,30].map(v=>`<option ${w.sp==v?'selected':''}>${v}</option>`).join('')}</select>x <button id="pb" onclick="S.g.wk.paused=!S.g.wk.paused;this.textContent=S.g.wk.paused?'Continuar':'Pausar'">Pausar</button> <label><input type="checkbox" ${w.auto?'checked':''} onchange="S.g.wk.auto=this.checked"> Pit automático</label>${T0.d.map((d,i)=>`<p>${d.n}: <select id="nt${i}">${tyOpts('M')}</select> <button onclick="boxe(${i})">Boxe na próxima volta</button></p>`).join('')}</div><div id="rc">${raceHtml()}</div>`;
+return head+`<div class="card wrap"><b>Resultado</b><table class="t">${w.res.map((c,i)=>`<tr><td>${c.dnf?'DNF':i+1}</td><td>${c.n}</td><td>${c.tn}</td><td>${c.pt||0}</td></tr>`).join('')}</table></div><button class="p" onclick="S.g.wk=null;S.tab='dash';go('manage')">Painel da equipe</button>`}
+const D=n=>'$ '+Math.round(n).toLocaleString('pt-BR'),nf=v=>v.toFixed(1).replace('.',',');
+const CARK=[['aero','Aerodinâmica'],['cam','Caixa de câmbio'],['fre','Freios'],['ele','Sistema elétrico'],['dir','Direção'],['con','Confiabilidade'],['cha','Chassi']];
+const cl=d=>{fixD(d);return {...d,at:{...d.at},sal:clamp(Math.round(d.r*12)*10,10,200)*1000,yrs:1}};
+const FA=[['Paul Aron','EE',22,7.2,8.5],['Jak Crawford','US',20,7.0,8.4],['Dennis Hauger','NO',22,7.1,7.9],['Luke Browning','GB',22,6.9,8.2],['Alex Dunne','IE',20,6.8,8.8],['Leonardo Fornaroli','IT',21,7.1,8.6],['Kush Maini','IN',25,6.9,7.4],['Victor Martins','FR',24,7.0,7.8],['Felipe Drugovich','BR',26,7.3,7.6],['Mick Schumacher','DE',27,7.3,7.5],['Nyck de Vries','NL',31,7.0,7.0],['Kevin Magnussen','DK',33,7.1,7.1]].map(a=>({n:a[0],c:a[1],age:a[2],r:a[3],pot:a[4]}));
+function vDash(){const g=S.g,t=g.team,c=g.car,r=CAL[g.round-1],tab=S.tab;
+const mb=`<div class="mb"><button onclick="S.tab='dash';draw()">Início</button><button onclick="S.tab='eq';draw()">Equipe</button><button onclick="S.tab='camp';draw()">Campeonato</button><button onclick="go('cal')">Calendário</button><button onclick="go('hof')">Honras</button><button onclick="save();alert('Jogo salvo.')">Salvar</button><button onclick="go('menu')">Menu</button></div>`;
+const fin=`<div class="row"><u>Receitas:</u><b>${D(g.rev)}</b></div><div class="row"><u>Despesas:</u><b>${D(g.gastos)}</b></div><div class="row"><u>Balanço ${g.season}:</u><b>${D(g.rev-g.gastos)}</b></div><div class="row"><u>Caixa:</u><b>${D(t.cash)}</b></div>`;
+if(tab=='camp')return mb+vCamp();if(tab=='eq')return mb+vEq();if(tab=='fin')return mb+vFin(fin);
+if(tab=='fin')return mb+`<div class="bx"><h4>Finanças</h4><div class="in">${fin}<p class="mu">Despesas: investimentos no carro, salários e quebras. Patrocínios entram numa próxima etapa.</p></div></div>`;
+const dr=(l,d)=>`<div class="row"><u>${l}:</u><span>${d?flag(d.c)+' '+pl(d):'—'}</span></div>`;
+return mb+`${t.cash<0?'<div style="background:#d42a2a;color:#fff;border-radius:12px;padding:10px;margin:10px 0">⚠️ Caixa negativo: cuidado com a falência. Corte custos (investimentos e salários).</div>':''}<div style="background:${t.bg};color:${t.fg};border-radius:12px;padding:16px;text-align:center;margin:10px 0"><div>${g.season}, ${Math.min(g.round,CAL.length)}ª etapa</div><h1 style="margin:4px 0"><i>${t.n}</i> ${flag(t.c)}</h1></div><div class="cols"><div><div class="bx"><h4 style="cursor:pointer" onclick="go('car')">Carro ›</h4><div class="in">${CARK.map(([k,n])=>`<div class="row"><u>${n}:</u><b>${nf(c[k])}</b></div>`).join('')}</div></div><div class="bx"><h4 style="cursor:pointer" onclick="go('mot')">Contratos / Motor ›</h4><div class="in"><div class="row"><u>Motor:</u><span>${g.mc?`${g.eng[g.mc.k].n} ${flag(g.eng[g.mc.k].c)} (${g.mc.yrs>50?'fabricante':g.mc.yrs+'a'})`:'<b>Sem motor!</b>'}</span></div></div></div></div>
+<div><div class="bx"><h4 style="cursor:pointer" onclick="go('drv')">Pilotos ›</h4><div class="in">${dr('1º Piloto',t.d[0])}${dr('2º Piloto',t.d[1])}${dr('P. Testes',t.t)}</div></div><div class="bx"><h4 style="cursor:pointer" onclick="S.tab='fin';draw()">Finanças ›</h4><div class="in">${fin}</div></div></div>
+<div><div class="bx"><h4 style="cursor:pointer" onclick="S.nw=!S.nw;draw()">Notícias ${S.nw?'▲':'▼'}</h4><div class="in">Você tem ${g.news.length} notícias${g.news.slice(0,S.nw?30:3).map(n=>`<div style="padding:4px 0;border-top:1px solid var(--bd)">${n}</div>`).join('')}</div></div><div class="bx"><h4>Próxima corrida</h4><div class="in" style="text-align:center">${r?`${r.c}<br>GP ${r.gp}<br>${flag(r.cc)}<br>${r.l} voltas${g.dbl&&g.round==CAL.length?'<br><b>Pontos em dobro!</b>':''}`:'Temporada encerrada'}</div></div><button class="p" style="width:100%;padding:18px;font-size:1.2em" ${g.mc?'':'disabled'} onclick="${r?'newWk()':'nextSeason()'}">${!g.mc?'Contrate um motor':r?'Continuar':'Nova temporada'}</button></div></div>`}
+function vCar(){const g=S.g,c=g.car;
+return `<div class="bx" style="max-width:440px;margin:20px auto"><h4 style="font-size:1.4em">Investimentos</h4><div class="in"><p style="text-align:center"><i><u>Gastos por corrida</u></i></p>${CARK.map(([k,n])=>`<div class="row" style="align-items:center"><u>${n}:</u><b>${nf(c[k])}</b><span>/ $ <input type="number" min="10" max="${g.lim/1000}" step="5" value="${g.inv[k]/1000}" style="width:72px" onchange="S.g.inv['${k}']=clamp(+this.value*1000,10000,S.g.lim);this.value=S.g.inv['${k}']/1000"> mil</span></div>`).join('')}<p class="mu">Limite por item: ${D(g.lim)}. Quanto mais investe, mais o item evolui a cada corrida.</p><button style="width:100%" onclick="S.tab='dash';go('manage')">Voltar</button></div></div>`}
+function propose(i){const g=S.g,d=g.pool[i],$=id=>document.getElementById(id+i).value;
+const role=$('ro'),sal=clamp(+$('sa'),10,200)*1000,yrs=+$('yr'),dem=clamp(Math.round(d.r*12)*10,10,200)*1000;
+if(d.r>g.team.s+3)return alert(d.n+' recusou: prefere uma equipe mais forte.');
+if(sal<dem)return alert(d.n+' recusou: quer pelo menos '+D(dem)+' por temporada.');
+const nd={...d,sal,yrs};let old;if(role=='t'){old=g.team.t;g.team.t=nd}else{old=g.team.d[+role];g.team.d[+role]=nd}
+g.pool.splice(i,1);if(old)g.pool.push(old);g.news.unshift(d.n+' assinou por '+yrs+' ano(s).');toast(d.n+' aceitou a proposta!',1);save();draw()}
+function vMkt(){const g=S.g,t=g.team;
+const my=[...t.d,t.t].map((d,i)=>d?`<tr><td>${['1º','2º','Testes'][i]}</td><td>${flag(d.c)} ${d.n}</td><td>${nf(d.r)}</td><td>${D(d.sal||0)}</td><td>${d.yrs||'-'} ano(s)${d.nx?' → '+d.nx.yrs+'a':''}</td><td><input id='rs${i}' type='number' min='10' max='200' step='10' value='${clamp(Math.round(d.r*12)*10,10,200)}' style='width:64px'>mil <select id='ry${i}'>${[1,2,3,4,5].map(y=>`<option>${y}</option>`).join('')}</select>a <button onclick="renew(${i})">Renovar</button></td></tr>`:'').join('');
+const fa=g.pool.map((d,i)=>`<tr><td>${flag(d.c)}</td><td>${d.n}</td><td>${d.age||'-'}</td><td>Sem contrato</td><td>${nf(d.r)}</td><td>${nf(d.pot||d.r)}</td><td><select id="ro${i}"><option value="0">1º</option><option value="1">2º</option><option value="t">Testes</option></select> <input id="sa${i}" type="number" min="10" max="200" step="10" value="${clamp(Math.round(d.r*12)*10,10,200)}" style="width:64px">mil <select id="yr${i}">${[1,2,3,4,5].map(y=>`<option>${y}</option>`).join('')}</select>a <button onclick="propose(${i})">Propor</button></td></tr>`).join('');
+const ot=g.grid.map((x,k)=>k==g.ti?'':x.d.map((d,j)=>`<tr><td>${flag(d.c)}</td><td>${d.n}</td><td>${d.a||'-'}</td><td>${x.n}</td><td>${nf(d.r)}</td><td>-</td><td>${frm(k+'_'+j,d)} <button onclick="poach(${k},${j})">Propor</button></td></tr>`).join('')).join('');
+return `<div class="bx"><h4>Meus pilotos</h4><div class="wrap"><table class="t"><tr><th>Função</th><th>Piloto</th><th>Nota</th><th>Salário/temp.</th><th>Contrato</th><th>Renovar</th></tr>${my}</table></div></div><div class="bx"><h4>Mercado de pilotos</h4><div class="wrap"><table class="t"><tr><th></th><th>Piloto</th><th>Idade</th><th>Equipe</th><th>Nota</th><th>Potencial</th><th>Proposta</th></tr>${fa}${ot}</table></div></div><button onclick="S.tab='dash';go('manage')">Voltar</button>`}
+function vCal(){const g=S.g,h=g.hist||[];
+const nm=g.grid.flatMap(t=>t.d.map(d=>[d.n,t.n,g.pts[d.n]||0,t.bg,t.fg,g.grid.indexOf(t)==g.ti])).sort((a,b)=>b[2]-a[2]);
+return `<div class="bx"><h4>Calendário ${g.season}</h4><div class="wrap"><table class="t">${CAL.map((r,i)=>`<tr style="${i==g.round-1?'font-weight:700':''}"><td>${i+1}</td><td>${flag(r.cc)}</td><td>GP ${r.gp}</td><td>${r.c}</td><td>${r.l} voltas</td><td>${h[i]?'Vencedor: '+h[i].w:i==g.round-1?'Próxima':''}</td></tr>`).join('')}</table></div></div><div class="bx"><h4>Resultados da temporada</h4><div class="wrap"><table class="t"><tr><th>Piloto</th><th>Equipe</th>${h.map((x,i)=>`<th>${i+1}</th>`).join('')}<th>Pts</th></tr>${nm.map(n=>`<tr style='${n[5]?'font-weight:700;background:'+n[3]+';color:'+n[4]:'background:'+n[3]+'22'}'><td>${n[0]}</td><td>${n[1]}</td>${h.map(x=>{const p=x.pos[n[0]];return `<td style='text-align:center;${p==1?'background:#f5c400;color:#000;font-weight:700':p==2?'background:#c0c0c0;color:#000;font-weight:700':p==3?'background:#cd7f32;color:#000;font-weight:700':''}'>${p??'-'}</td>`}).join('')}<td>${n[2]}</td></tr>`).join('')}</table></div></div><button onclick="S.tab='dash';go('manage')">Voltar</button>`}
+const EP={mer:[9,2e6],fer:[8,1.9e6],rbf:[8,1.9e6],aud:[7,9e5],hon:[5,2e5],ren:[3,1.5e5]};
+const MF={2026:{0:'mer',1:'fer',3:'rbf',9:'aud'},2025:{1:'fer',3:'mer',8:'ren'}};
+function engInit(t){const e={};for(const k in ENG)e[k]={n:ENG[k][0],c:ENG[k][1],pw:EP[k][0],pr:EP[k][1]};if(t.mot)e.own={n:t.eng,c:t.engc,pw:t.pw/10,pr:0};return e}
+const ep=g=>g.mc?(e=>e.el?(e.pw+e.el)/2:e.pw)(g.eng[g.mc.k]):5;
+const tyre=(c,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 40 40" style="vertical-align:middle"><circle cx="20" cy="20" r="19" fill="#111"/><circle cx="20" cy="20" r="14.5" fill="none" stroke="${TY[c][1]}" stroke-width="3" stroke-dasharray="11 3"/><circle cx="20" cy="20" r="9" fill="#2a2a2a"/><path d="M20 12v16M12 20h16M14.3 14.3l11.4 11.4M25.7 14.3L14.3 25.7" stroke="#aaa" stroke-width="1.4"/><circle cx="20" cy="20" r="2.5" fill="#ddd"/></svg>`;
+const frm=(id,d)=>`<select id="ro${id}"><option value="0">1º</option><option value="1">2º</option><option value="t">Testes</option></select> <input id="sa${id}" type="number" min="10" max="200" step="10" value="${clamp(Math.round(d.r*12)*10,10,200)}" style="width:64px">mil <select id="yr${id}">${[1,2,3,4,5].map(y=>`<option>${y}</option>`).join('')}</select>a`;
+function poach(k,j){const g=S.g,d=g.grid[k].d[j],$=x=>document.getElementById(x+k+'_'+j).value;
+const role=$('ro'),sal=clamp(+$('sa'),10,200)*1000,yrs=+$('yr'),dem=Math.min(2e5,clamp(Math.round(d.r*12)*10,10,200)*1000*1.3);
+if(d.r>g.team.s+3)return alert(d.n+' recusou: prefere uma equipe mais forte.');
+if(sal<dem)return alert(d.n+' quer pelo menos '+D(dem)+' para deixar a equipe atual.');
+const rep=[...g.pool].sort((a,b)=>b.r-a.r)[0];if(!rep)return alert('A equipe dele não tem substituto no mercado.');
+g.pool.splice(g.pool.indexOf(rep),1);g.grid[k].d[j]=cl(rep);
+const t=g.team,nd={...d,sal,yrs};let old;if(role=='t'){old=t.t;t.t=nd}else{old=t.d[+role];t.d[+role]=nd}
+if(old)g.pool.push(old);g.news.unshift(d.n+' deixou '+g.grid[k].n+' e assinou com sua equipe.');toast(d.n+' aceitou deixar '+g.grid[k].n+'!',1);save();draw()}
+function vMot(){const g=S.g,mc=g.mc,can=!mc||(mc.yrs<=1&&!mc.mfg&&!mc.next);
+const rows=Object.entries(g.eng).map(([k,e])=>{const cur=mc&&mc.k==k,own=mc&&mc.mfg&&cur,pr=own?e.pr/2:e.pr;
+return `<tr><td>${flag(e.c)} ${e.n}</td><td>${nf(e.pw)}</td><td>${D(pr)}${own?' (metade)':''}</td><td>${cur?(mc.yrs>50?'Seu motor':mc.yrs+' ano(s)'+(mc.next?' → '+mc.next.yrs+' ano(s)':'')):''}</td><td>${can&&k!='own'?`<select id="my${k}"><option>1</option><option>2</option></select>a <button onclick="buyEng('${k}')">${cur?'Renovar':'Contratar'}</button>`:''}</td></tr>`}).join('');
+return `${engUI(g)}<div class="bx"><h4>Motores</h4><div class="wrap in"><table class="t"><tr><th>Fabricante</th><th>Força</th><th>Preço/temp.</th><th>Contrato</th><th></th></tr>${rows}</table><p class="mu">Contratos de 1 ou 2 anos, pagos na assinatura. Troca ou renovação só no último ano. Fabricante não troca de motor e paga metade.</p></div></div><button onclick="S.tab='dash';go('manage')">Voltar</button>`}
+function buyEng(k){const g=S.g,e=g.eng[k],y=+document.getElementById('my'+k).value,pr=e.pr*y;
+if(g.team.cash<pr)return alert('Caixa insuficiente.');g.team.cash-=pr;g.gastos+=pr;
+if(g.mc)g.mc.next={k,yrs:y};else g.mc={k,yrs:y};g.news.unshift('Motor '+e.n+': contrato de '+y+' ano(s).');save();draw()}
+function nextSeason(){const g=S.g,cs=g.grid.map(t=>[t.n,g.cpts[t.n]||0]).sort((a,b)=>b[1]-a[1]),pos=cs.findIndex(x=>x[0]==g.team.n),dp=Object.entries(g.pts).sort((a,b)=>b[1]-a[1])[0],pz=CASH[Math.min(pos,CASH.length-1)];
+if(pos==0){g.rec.t++;g.sp.forEach(s=>{g.team.cash+=s.bc;g.rev+=s.bc})}if(dp&&g.team.d.some(d=>d.n==dp[0]))g.rec.dt++;
+g.old.push({y:g.season,p:pos+1});if(dp&&g.hf&&g.hf[dp[0]])g.hf[dp[0]].t++;g.team.cash+=pz;g.rev+=pz;
+for(const k in g.eng)g.eng[k].pw=clamp(g.eng[k].pw+rnd(-.5,.5),3,10);
+if(g.mc&&!g.mc.mfg){if(g.mc.next)g.mc={...g.mc.next};else{g.mc.yrs--;if(g.mc.yrs<=0)g.mc=null}}
+contracts(g);if(g.mc&&g.mc.mfg){const v=g.grid.filter((x,k)=>k!=g.ti&&x.e==g.mc.k).slice(0,3).length*g.eng[g.mc.k].pr*2;g.team.cash+=v;g.rev+=v}g.season++;g.round=1;g.pts={};g.cpts={};g.hist=[];g.lim=Math.min(5e5,g.lim+5e3);g.sp=[];g.off=[];g.news.unshift('Nova temporada: '+g.season);save();draw()}
+const SPN=[['Orakle Cloud','#1e3a8a'],['Petronex','#00a19b'],['Mobel Oil','#d4002a'],['Heinekin Zero','#2e7d32'],['Santandor','#ec0000'],['Rolexa','#0a5c36'],['Marlborg','#c8102e'],['Pirelo','#f2b705'],['Shelle','#e6b800'],['Castrel','#009a44'],['DHX Express','#d4a900'],['Emirati Air','#d71921'],['Aramko','#00a3e0'],['Monstar Drink','#6a9a1f']];
+function mkOffer(g){if(g.sp.length+g.off.length>=3)return;const used=[...g.sp,...g.off].map(x=>x.n),pl=SPN.filter(x=>!used.includes(x[0])),b=pl[Math.floor(rnd(0,pl.length))],rk=g.grid.filter(t=>t.s>g.team.s).length,v=rk<4?rnd(8,10):rk<8?rnd(5,7):5;
+g.off.push({n:b[0],bg:b[1],v:Math.round(v*10)*2e5,bw:Math.round(rnd(1,4))*2e5,bp:1e5,bc:Math.round(rnd(1,5))*2e6});g.news.unshift('Nova oferta de patrocínio: '+b[0])}
+const spn=s=>`<div class="row"><b style="color:${s.bg}">${s.n}</b><span>${D(s.v)}/temp.</span></div><div class="mu" style="font-size:.85em">Bônus: vitória ${D(s.bw)} · pole ${D(s.bp)} · título até ${D(s.bc)}</div>`;
+function accSp(i){const g=S.g;if(g.sp.length>=3)return alert('Máximo de 3 patrocínios.');g.sp.push(g.off.splice(i,1)[0]);save();draw()}
+function vFin(fin){const g=S.g;
+return `<div class="bx"><h4>Finanças</h4><div class="in">${fin}<div class="row mu"><span>Última corrida</span><span>+${D(g.lasti||0)} patrocínios / −${D(g.lastc||0)} gastos</span></div></div></div><div class="bx"><h4>Patrocínios (${g.sp.length}/3)</h4><div class="in">${g.sp.map(spn).join('')||'<span class="mu">Nenhum contrato.</span>'}</div></div><div class="bx"><h4>Ofertas</h4><div class="in">${g.off.map((s,i)=>spn(s)+`<button class="p" onclick="accSp(${i})">Aceitar</button> <button onclick="S.g.off.splice(${i},1);draw()">Recusar</button><hr>`).join('')||'<span class="mu">Sem ofertas no momento.</span>'}</div></div>`}
+function vEq(){const g=S.g,t=g.team,cs=g.grid.map(x=>[x.n,g.cpts[x.n]||0]).sort((a,b)=>b[1]-a[1]),all=g.grid.flatMap(x=>x.d.map(d=>[d.n,g.pts[d.n]||0])).sort((a,b)=>b[1]-a[1]);
+const tr=on=>`<svg width="64" height="70" viewBox="0 0 64 70"><path d="M16 6h32v18c0 12-8 18-16 18S16 36 16 24zM16 10H6c0 12 4 18 12 20M48 10h10c0 12-4 18-12 20M28 42h8v12h10v10H18V54h10z" fill="${on?'#f5b301':'none'}" stroke="#888" stroke-width="2"/></svg>`;
+const R=(a,b)=>`<div class="row"><span>${a}</span><b>${b}</b></div>`;
+return `<div class="bx"><h4>Minha equipe</h4><div class="in"><h2 style="margin:0">${t.n} ${flag(t.c)}</h2>${R('Chefe de equipe',g.boss)}${R('Categoria',t.lv)}${R('Motor',g.mc?g.eng[g.mc.k].n:'-')}${R('Títulos de construtores',g.rec.t)}${R('Títulos de pilotos',g.rec.dt)}${R('Vitórias',g.rec.w)}${R('Poles',g.rec.p)}${R('Posição da equipe',(cs.findIndex(x=>x[0]==t.n)+1)+'º')}${t.d.map(d=>R(flag(d.c)+' '+d.n,(all.findIndex(x=>x[0]==d.n)+1)+'º')).join('')}<div style="display:flex;gap:24px;justify-content:center;margin-top:10px"><div style="text-align:center">${tr(g.rec.dt>0)}<div class="mu">Pilotos</div></div><div style="text-align:center">${tr(g.rec.t>0)}<div class="mu">Construtores</div></div></div></div></div><div class="bx"><h4>Histórico</h4><div class="in">${g.old.map(o=>R(o.y,o.p+'º nos construtores')).join('')||'<span class="mu">Nenhuma temporada concluída.</span>'}</div></div><p><button onclick="go('ret')">Aposentar-se como chefe de equipe</button></p>`}
+window.alert=m=>toast(m,/recusou|quer pelo|insuficiente|ximo de|Digite|antigo|substituto/.test(m)?0:2);
+function toast(m,k){const d=document.createElement('div');d.textContent=m;d.style.cssText='position:fixed;top:14px;right:14px;z-index:99;padding:12px 16px;border-radius:10px;color:#fff;font-weight:600;max-width:320px;box-shadow:0 4px 14px #0004;background:'+(k==1?'#1a9d4b':k===0?'#d42a2a':'#14181f');document.body.appendChild(d);setTimeout(()=>d.remove(),4500)}
+const AGE={Verstappen:29,Norris:27,Piastri:25,Leclerc:29,Hamilton:41,Russell:28,Antonelli:20,Alonso:45,Sainz:31,Albon:30,Gasly:30,Colapinto:23,Ocon:30,Bearman:21,Lawson:24,Lindblad:19,Hadjar:22,'Hülkenberg':39,Bortoleto:22,'Pérez':36,Bottas:37,Stroll:28,Tsunoda:26};
+for(const y in SEASONS)SEASONS[y].forEach(t=>t.d.forEach(d=>{if(!d.a)d.a=AGE[d.n.split(' ').pop()]||28}));
+try{const c=JSON.parse(localStorage.getItem('pwm_x0'));if(c){if(c.C)CAL.splice(0,CAL.length,...c.C);if(c.P)Object.assign(EP,c.P)}}catch(e){}
+function saveCust(){try{localStorage.setItem('pwm_custom',JSON.stringify({S:SEASONS,E:ENG,C:CAL,P:EP}));alert('Salvo.')}catch(e){alert('Não foi possível salvar.')}}
+function vCust(){const ts=SEASONS[CY],I=(v,w,f,x)=>`<input value='${v}' style='width:${w}px' ${x||''} onchange="${f}">`,N=(l,v,a,f)=>`<label>${l} <input type='number' ${a} value='${v}' style='width:70px' onchange="${f}"></label>`;
+return `<h2>Customizar</h2><p class='mu'>Edite o que quiser e clique em Salvar. Vale para novos jogos.</p><p>Temporada: <select onchange="CY=+this.value;draw()">${Object.keys(SEASONS).map(y=>`<option ${y==CY?'selected':''}>${y}</option>`).join('')}</select></p>${ts.map((t,i)=>{const P=`SEASONS[CY][${i}]`;return `<div class='bx'><h4 style='background:${t.bg};color:${t.fg}'>${t.n}</h4><div class='in'><div class='row' style='justify-content:flex-start;flex-wrap:wrap'>${I(t.n,170,P+`.n=this.value.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'')||'Equipe'`,'maxlength=30')}${I(t.c,40,P+'.c=this.value.toUpperCase().slice(0,2)')}<input type='color' value='${t.bg}' onchange="${P}.bg=this.value"><input type='color' value='${t.fg}' onchange="${P}.fg=this.value">${N('Força',t.s,'min=3 max=10 step=.1',`setS(${P},+this.value);draw()`)}</div><div class='row' style='justify-content:flex-start;flex-wrap:wrap'><span class='mu'>Carro:</span>${CARK.map(([k,n])=>N(n,+((t.cr&&t.cr[k])||t.s).toFixed(1),'min=3 max=10 step=.1',`(${P}.cr=${P}.cr||{})['${k}']=clamp(+this.value,3,10)`)).join('')}</div>${t.d.map((d,j)=>{const Q=P+`.d[${j}]`;return `<div class='row' style='justify-content:flex-start;flex-wrap:wrap'>${I(d.n,160,Q+'.n=this.value')}${I(d.c,40,Q+'.c=this.value.toUpperCase().slice(0,2)')}${N('Idade',d.a,'min=16 max=60',Q+'.a=clamp(+this.value,16,60)')}${N('Nota',d.r,'min=1 max=10 step=.1',Q+'.r=clamp(+this.value,1,10);draw()')}${N('Pot',d.pot,'min=1 max=10 step=.1',Q+'.pot=clamp(+this.value,1,10)')}${N('Auge',d.au,'min=20 max=40',Q+'.au=clamp(+this.value,20,40)')}${N('Apos.',d.ap,'min=25 max=50',Q+'.ap=clamp(+this.value,25,50)')}${ATK.map(([k,n])=>N(n,at(d,k).toFixed(1),'min=1 max=10 step=.1',`(${Q}.at=${Q}.at||{})['${k}']=clamp(+this.value,1,10)-${Q}.r`)).join('')}</div>`}).join('')}</div></div>`}).join('')}<div class='bx'><h4>Motores</h4><div class='in'>${Object.keys(ENG).map(k=>`<div class='row' style='justify-content:flex-start;flex-wrap:wrap'>${I(ENG[k][0],160,`ENG['${k}'][0]=this.value`)}${I(ENG[k][1],40,`ENG['${k}'][1]=this.value.toUpperCase().slice(0,2)`)}${N('Força',EP[k][0],'min=1 max=10 step=.1',`EP['${k}'][0]=clamp(+this.value,1,10)`)}${N('Preço',EP[k][1],'step=10000',`EP['${k}'][1]=Math.max(0,+this.value)`)}</div>`).join('')}</div></div><div class='bx'><h4>Circuitos</h4><div class='in'>${CAL.map((r,i)=>`<div class='row' style='justify-content:flex-start;flex-wrap:wrap'>${I(r.gp,120,`CAL[${i}].gp=this.value`)}${I(r.c,150,`CAL[${i}].c=this.value`)}${I(r.cc,40,`CAL[${i}].cc=this.value.toUpperCase().slice(0,2)`)}${N('Voltas',r.l,'min=5 max=120',`CAL[${i}].l=clamp(+this.value,5,120)`)}<label><input type='checkbox' ${r.dry?'checked':''} onchange="CAL[${i}].dry=+this.checked"> sem chuva</label></div>`).join('')}</div></div><p><button onclick="go('menu')">Voltar</button> <button class='p' onclick="saveCust()">Salvar</button> <button onclick="if(confirm('Restaurar padrões?')){try{localStorage.removeItem('pwm_custom');localStorage.removeItem('pwm_custom2')}catch(e){}location.reload()}">Restaurar</button></p>`}
+const WI=['☀️','🌦️','🌧️'];
+const wxh=(x,t)=>`<span>${WI.map((e,i)=>`<span style='font-size:${i==x?'1.9em':'1.2em'};opacity:${i==x?1:.25}'>${e}</span>`).join(' ')} <b>${WX[x]}</b> </span>`;
+const tm=s=>{const m=Math.floor(s/60);return m+':'+(s-m*60).toFixed(3).padStart(6,'0')};
+const tyPick=(cur,js)=>Object.keys(TY).map(c=>`<span title='${TY[c][0]}' onclick="${js.replace('#',c)}" style='cursor:pointer;display:inline-block;border-radius:50%;padding:2px;margin:2px;outline:${cur==c?'3px solid var(--ac)':'none'}'>${tyre(c,34)}</span>`).join('');
+let TM2;
+function qstep(dt){const Q=S.g.wk.qs;Q.t=Math.max(0,Q.t-dt);Q.c.forEach(c=>{c.nx-=dt;if(c.nx<=0){c.nx+=rnd(95,130);const l=((S.g.wk.r.bt||90)-2)+(10-c.sc)*.45+rnd(-.5,.6);if(!c.bt||l<c.bt)c.bt=l}})}
+function qend(){const w=S.g.wk;w.q=[...w.qs.c].sort((a,b)=>(a.bt||999)-(b.bt||999));w.ph='qr';draw()}
+function qloop(){clearInterval(TM2);const w=S.g.wk;TM2=setInterval(()=>{if(S.screen!='wk'||w.ph!='qs')return clearInterval(TM2);if(w.paused)return;qstep(w.qsp*15);if(w.qs.t<=0){clearInterval(TM2);qend()}else{const e=document.getElementById('rc');if(e)e.innerHTML=qHtml()}},500)}
+function doQuali(){const g=S.g,w=g.wk,c=[];g.grid.forEach((t,k)=>t.d.forEach((d,j)=>{const me=k==g.ti;c.push({ti:k,j,t,d,sc:perf(t,d,me?(w.mood[j]-.5)*.8+(w.aero==w.bias?.1:0)-((w.wx==0?'SMH':w.wx==1?'I':'W').includes(w.tyre)?0:1):0),bt:0,nx:rnd(0,60)})}));w.qs={t:1500,c};w.paused=false;w.ph='qs';draw();qloop()}
+function simQ(){const w=S.g.wk;clearInterval(TM2);while(w.qs.t>0)qstep(30);qend()}
+function simRace(){const w=S.g.wk;w.sim=1;clearInterval(TM);while(w.ph=='race')stepLap()}
+function lights(){const w=S.g.wk;draw();const id=setInterval(()=>{w.lt++;draw();if(w.lt>=5){clearInterval(id);setTimeout(()=>{w.lt=6;draw();setTimeout(()=>{w.ph='race';draw();loop()},700)},500+Math.random()*1200)}},900)}
+function pitAlert(c){const w=S.g.wk;w.paused=true;const pb=document.getElementById('pb');if(pb)pb.textContent='Continuar';const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:99';d.innerHTML=`<div class='bx' style='max-width:340px;padding:16px;text-align:center'><h3>⚠️ Hora de trocar os pneus</h3><p>${c.n} (${TY[c.cp][0]}) está no limite do desgaste.</p><button class='p' id='pa'>Boxe agora</button> <button id='pc'>Continuar na pista</button></div>`;document.body.appendChild(d);const go=p=>{if(p)c.pit=nextTy(w.race.wx,c);w.paused=false;if(pb)pb.textContent='Pausar';d.remove()};d.querySelector('#pa').onclick=()=>go(1);d.querySelector('#pc').onclick=()=>go(0)}
+function qHtml(){const g=S.g,Q=g.wk.qs,o=[...Q.c].sort((a,b)=>(a.bt||999)-(b.bt||999));return `<p style='font-size:1.6em;font-weight:700;margin:0'>⏱ ${Math.floor(Q.t/60)}:${String(Math.floor(Q.t%60)).padStart(2,'0')}</p><div class='wrap'><table class='t'><tr><th>P</th><th>Piloto</th><th>Equipe</th><th>Melhor volta</th></tr>${o.map((c,i)=>`<tr style='${c.ti==g.ti?'font-weight:700;background:'+c.t.bg+';color:'+c.t.fg:'background:'+c.t.bg+'22'}'><td style='border-left:8px solid ${c.t.bg}'>${i+1}</td><td>${flag(c.d.c)} ${c.d.n}</td><td>${c.t.n}</td><td>${c.bt?tm(c.bt):'-'}</td></tr>`).join('')}</table></div>`}
+function raceHtml(){const g=S.g,w=g.wk,R=w.race,o=ord(R),f=o[0].tot;return `<div style='display:flex;justify-content:space-between;flex-wrap:wrap'><b>Volta ${Math.min(R.lap,R.l)}/${R.l}</b>${wxh(R.wx,w.temp)}</div><p>${Object.keys(TY).map(c=>tyre(c,20)+' '+TY[c][0]).join(' &nbsp; ')}</p><p class='mu'>${R.cars.filter(c=>c.ti==g.ti&&!c.dnf).map(c=>`${c.n}: troca ideal em ~${Math.max(0,lf(c,w.temp)-2-c.age)} voltas`).join(' · ')}</p><div class='wrap'><table class='t'><tr><th>P</th><th>Piloto</th><th>Frente</th><th>Atrás</th><th>Líder</th><th>Pneu</th><th>Pit</th><th>Pneu restante</th></tr>${o.map((c,i)=>{const a=o[i-1],b=o[i+1],rm=Math.max(0,100-c.age/lf(c,w.temp)*100);return `<tr style='${c.ti==g.ti?'font-weight:700;background:'+c.bg+';color:'+c.fg:'background:'+c.bg+'22'}'><td style='border-left:8px solid ${c.bg}'>${i+1}</td><td>${flag(c.cc)} ${c.n}${c.pit?' <span class=pit>BOX ▶</span>':''}${c.ip>0?' <span class=pit>🔧 PIT</span>':''}</td>${c.dnf?`<td colspan=6><b style='color:#d42a2a'>DNF · volta ${c.dl} · ${c.why||'Abandono'}</b></td>`:`<td>${a?'+'+(c.tot-a.tot).toFixed(1):'-'}</td><td>${b&&!b.dnf?'-'+(b.tot-c.tot).toFixed(1):'-'}</td><td>${i?(c.tot-f>f/Math.max(1,R.lap)?'+'+Math.floor((c.tot-f)/(f/Math.max(1,R.lap)))+' Lap':'+'+(c.tot-f).toFixed(1)):'-'}</td><td>${tyre(c.cp,20)} ${TY[c.cp][0]} <small>(${Math.max(0,lf(c,w.temp)-c.age)} v)</small></td><td>${c.stops}</td><td><div class='bar' style='width:70px'><i style='width:${rm}%;background:${rm>30?'#1db954':rm>12?'#f5c400':'#e10600'}'></i></div></td>`}</tr>`}).join('')}</table></div><div class='mu'>${R.msg.slice(0,5).join('<br>')}</div>`}
+function vWk(){const g=S.g,w=g.wk,r=w.r,T0=g.team,ph=w.ph;
+const head=`<div class='bx'><h4>GP ${r.gp} ${flag(r.cc)}</h4><div class='in' style='display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px'><span>${r.c} · ${r.l} voltas · favorece ${{c:'curvas',r:'retas',m:'equilíbrio'}[w.bias]}</span>${wxh(w.wx,w.temp)}</div></div>`;
+const card=h=>head+`<div class='card'>${h}</div>`;
+const lay=(c,m)=>head+`<div style='display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start'><div class='bx' style='width:230px;flex:none;position:sticky;top:8px'><h4>Comandos</h4><div class='in'>${c}</div></div><div class='card' style='flex:1;min-width:300px;margin:0' id='rc'>${m}</div></div>`;
+const pz=`<button id='pb' onclick="S.g.wk.paused=!S.g.wk.paused;this.textContent=S.g.wk.paused?'Continuar':'Pausar'">${w.paused?'Continuar':'Pausar'}</button>`;
+const sel=(k,f)=>`<select onchange="S.g.wk.${k}=+this.value${f||''}">${[1,2,5].map(v=>`<option ${w[k]==v?'selected':''}>${v}</option>`).join('')}</select>x`;
+if(ph=='tr1'||ph=='tr2')return card(`<b>Treino livre ${ph=='tr1'?1:2}</b><p>Pneu:<br>${tyPick(w.tyre,`S.g.wk.tyre='#';draw()`)}</p><p>Acerto: ${aeroSel(w.aero)}</p><button class='p' onclick="doPractice()">Rodar sessão</button>${w.log.map(l=>`<p>${l}</p>`).join('')}`);
+if(ph=='q')return card(`<b>Classificação (25 min)</b><p class='mu'>Peso: 60% piloto, 40% carro. Moral e acerto também contam.</p>${dur(w)}<p>Pneu da classificação:<br>${tyPick(w.tyre,"S.g.wk.tyre='#';draw()")}</p><button class='p' onclick="doQuali()">Iniciar classificação</button>`);
+if(ph=='qs')return lay(`<b>Simulação automática</b><p class='mu'>Velocidade 2x. O jogo simula a sessão inteira.</p><p><button class='p' onclick="simQ()">Simular agora</button></p>`,qHtml());
+if(ph=='qr')return card(`<b>Grid de largada</b><div class='wrap'><table class='t'>${w.q.map((x,i)=>`<tr style='${x.ti==g.ti?'font-weight:700;background:'+x.t.bg+';color:'+x.t.fg:'background:'+x.t.bg+'22'}'><td style='border-left:8px solid ${x.t.bg}'>${i+1}</td><td>${flag(x.d.c)} ${x.d.n}</td><td>${x.t.n}</td><td>${x.bt?tm(x.bt):'-'}</td></tr>`).join('')}</table></div><p><button class='p' onclick="S.g.wk.ph='setup';draw()">Preparar corrida</button></p>`);
+if(ph=='setup')return card(setupHtml(g,w))||card(`<b>Preparação da corrida</b>${T0.d.map((d,i)=>`<p>${flag(d.c)} ${d.n} (largada ${w.q.findIndex(x=>x.ti==g.ti&&x.j==i)+1}º)<br>${tyPick(w.rt[i],`S.g.wk.rt[${i}]='#';draw()`)}</p>`).join('')}${dur(w)}<p>Acerto: ${aeroSel(w.aero)}</p><button class='p' onclick="startRace()">Largar</button>`);
+if(ph=='lights')return card(`<div style='display:flex;gap:10px;justify-content:center;padding:30px'>${[1,2,3,4,5].map(i=>`<span style='width:44px;height:44px;border-radius:50%;background:${w.lt==6?'#1db954':i<=w.lt?'#e10600':'#333'}'></span>`).join('')}</div><p style='text-align:center;font-weight:700'>${w.lt==6?'LARGADA!':'Prepare-se...'}</p>`);
+if(ph=='race')return lay(`<div id='tk'>${trk(w)}</div>Velocidade<br>${sel('sp',';loop()')}<p>${pz} <button class='p' onclick="simRace()">Simular</button></p>${T0.d.map((d,i)=>`<p><b>${flag(d.c)} ${d.n}</b><br><select id='nt${i}'>${tyOpts('M')}</select><br><label><input type='checkbox' ${w.pa[i]?'checked':''} onchange='S.g.wk.pa[${i}]=this.checked'> Pit automático</label><br><button onclick="boxe(${i})">Boxe na próxima volta</button></p>`).join('')}`,raceHtml());
+return card(`<b>Resultado</b><div class='wrap'><table class='t'>${w.res.map((c,i)=>`<tr style='${c.ti==g.ti?'font-weight:700;background:'+c.bg+';color:'+c.fg:'background:'+c.bg+'22'}'><td style='border-left:8px solid ${c.bg}'>${c.dnf?'DNF':i+1}</td><td>${flag(c.cc)} ${c.n}</td><td>${c.tn}</td><td>${c.pt||0}</td></tr>`).join('')}</table></div><p><button class='p' onclick="S.g.wk=null;S.tab='dash';go('manage')">Painel da equipe</button></p>`)}
+const mt=(v,lim)=>Math.min(lim,Math.max(10000,Math.round((20000+(v-3)*28000)/5000)*5000));
+function ensureInv(g){if(g.pinv)return;g.pinv={};CARK.forEach(([k])=>{g.inv[k]=g.pinv[k]=mt(g.car[k],g.lim)})}
+const TST={Mercedes:['Frederik Vesti','DK',7],Ferrari:['Antonio Giovinazzi','IT',7.2],McLaren:["Pato O'Ward",'MX',7],'Red Bull':['Ayumu Iwasa','JP',6.8],'Aston Martin':['Felipe Drugovich','BR',7.3],Alpine:['Paul Aron','EE',7.2],Williams:['Luke Browning','GB',6.9],Haas:['Ryo Hirakawa','JP',6.9]};
+function initG(g,o){const m=S.season>=2025?TST[o.n]:null;let p=m?{n:m[0],c:m[1],r:m[2],age:26,pot:m[2]}:null;if(p)g.pool=g.pool.filter(x=>x.n!=p.n);else p=g.pool.shift();if(p)g.team.t=cl(p);ensureInv(g)}
+function evolve(g,o){o.forEach((c,i)=>{const d=g.grid[c.ti].d[c.j];if(!d)return;const a=d.a||28,m=d.m==null?.5:d.m,res=c.dnf?.2:i<3?1:i<10?.6:.3;d.m=clamp(m*.7+res*.3,0,1);d.r=clamp(d.r+(a<25?.04:a<33?0:-.04)+(res-.5)*.06+(d.m-.5)*.04+rnd(-.02,.02),1,10)})}
+function renew(i){const g=S.g,t=g.team,d=i==2?t.t:t.d[i],sal=clamp(+document.getElementById('rs'+i).value,10,200)*1000,y=+document.getElementById('ry'+i).value,dem=clamp(Math.round(d.r*12)*10,10,200)*1000;
+if(d.r>t.s+3)return alert(d.n+' recusou renovar: prefere uma equipe mais forte.');
+if(sal<dem)return alert(d.n+' recusou renovar: quer pelo menos '+D(dem)+' por temporada.');
+d.nx={sal,yrs:y};g.news.unshift(d.n+' renovou por '+y+' ano(s).');toast(d.n+' aceitou renovar por '+y+' ano(s)!',1);save();draw()}
+function poach(k,j){const g=S.g,d=g.grid[k].d[j],$=x=>document.getElementById(x+k+'_'+j).value;
+const role=$('ro'),sal=clamp(+$('sa'),10,200)*1000,yrs=+$('yr'),dem=Math.min(2e5,clamp(Math.round(d.r*12)*10,10,200)*1000*1.3);
+if((g.pend||[]).some(p=>p.d.n==d.n))return alert(d.n+' recusou: já tem pré-contrato com você.');
+if(d.r>g.team.s+3)return alert(d.n+' recusou: prefere uma equipe mais forte.');
+if(sal<dem)return alert(d.n+' quer pelo menos '+D(dem)+' para deixar a equipe atual.');
+(g.pend=g.pend||[]).push({k,j,d:{...d},role,sal,yrs});g.news.unshift(d.n+' assinou pré-contrato: chega após o fim da temporada.');toast(d.n+' aceitou! Só chega quando o contrato com '+g.grid[k].n+' acabar (fim da temporada).',1);save();draw()}
+function contracts(g){const t=g.team,best=()=>{const p=[...g.pool].sort((a,b)=>b.r-a.r)[0];if(!p)return null;g.pool.splice(g.pool.indexOf(p),1);return cl(p)};
+[0,1,'t'].forEach(k=>{const d=k=='t'?t.t:t.d[k];if(!d)return;if(d.nx){d.sal=d.nx.sal;d.yrs=d.nx.yrs;delete d.nx}else if(d.yrs>1)d.yrs--;else{const r=best();if(k=='t'){g.pool.push(d);t.t=r;g.news.unshift(d.n+' saiu: contrato encerrado.')}else if(r){g.pool.push(d);t.d[k]=r;g.news.unshift(d.n+' saiu: contrato encerrado.')}}});
+(g.pend||[]).forEach(p=>{const s=g.grid[p.k].d[p.j];if(!s||s.n!=p.d.n)return;const r=best();if(!r)return;g.grid[p.k].d[p.j]=r;const nd={...s,sal:p.sal,yrs:p.yrs};let old;if(p.role=='t'){old=t.t;t.t=nd}else{old=t.d[+p.role];t.d[+p.role]=nd}if(old)g.pool.push(old);g.news.unshift(s.n+' chegou à sua equipe.')});
+g.grid.forEach(x=>x.d.forEach((d,j)=>{if((d.a||d.age||28)>=d.ap){const r=best();if(r){x.d[j]=r;g.news.unshift(d.n+' se aposentou.')}}}));g.pend=[];[...g.grid.flatMap(x=>x.d),t.t,...g.pool].forEach(d=>{if(d){if(d.a)d.a++;else if(d.age)d.age++}})}
+function vCamp(){const g=S.g;if(!g.grid)return '';const rs=(me,t)=>me?`background:${t.bg};color:${t.fg};font-weight:700`:`background:${t.bg}22`;
+const all=g.grid.flatMap((t,k)=>t.d.map(d=>[d,t,k==g.ti,g.pts[d.n]||0])).sort((a,b)=>b[3]-a[3]),cs=g.grid.map((t,k)=>[t,k==g.ti,g.cpts[t.n]||0]).sort((a,b)=>b[2]-a[2]);
+return `<div class='bx'><h4>Pilotos</h4><div class='in wrap'><table class='t'>${all.map((x,i)=>`<tr style='${rs(x[2],x[1])}'><td style='border-left:8px solid ${x[1].bg}'>${i+1}</td><td>${flag(x[0].c)} ${x[0].n}</td><td>${x[1].n}</td><td>${x[3]}</td></tr>`).join('')}</table></div></div><div class='bx'><h4>Construtores</h4><div class='in wrap'><table class='t'>${cs.map((x,i)=>`<tr style='${rs(x[1],x[0])}'><td style='border-left:8px solid ${x[0].bg}'>${i+1}</td><td>${flag(x[0].c)} ${x[0].n}</td><td>${x[2]}</td></tr>`).join('')}</table></div></div>`}
+function vCar(){const g=S.g,c=g.car,tt=g.team.t;ensureInv(g);
+return `<div class='bx' style='max-width:560px;margin:20px auto'><h4>Investimentos</h4><div class='in'><p style='text-align:center'><i><u>Gastos por corrida</u></i></p>${CARK.map(([k,n])=>{const m=mt(c[k],g.lim),v=g.inv[k],a=v>m*1.02?'▲':v<m*.98?'▼':'=';return `<div class='row' style='align-items:center;flex-wrap:wrap'><span>${n}</span><b>${nf(c[k])} ${a}</b><span class='mu'>manter ${m/1000} mil</span><span>$ <input type='number' min='10' max='${g.lim/1000}' step='5' value='${v/1000}' style='width:72px' onchange="S.g.inv['${k}']=clamp(+this.value*1000,10000,S.g.lim);draw()"> mil</span></div>`}).join('')}<p class='mu'>Piloto de testes: ${tt?flag(tt.c)+' '+tt.n+' (nota '+nf(tt.r)+'). Quanto melhor, mais rápido o carro evolui.':'nenhum'}<br>Investir acima do valor de manutenção melhora o item; abaixo, piora. Mudanças bruscas têm efeito maior.</p><button style='width:100%' onclick="S.tab='dash';go('manage')">Voltar</button></div></div>`}
+const ATK=[['la','La'],['co','Co'],['ul','Ul'],['ex','Ex'],['ra','Ra'],['ch','Ch'],['ac','Ac'],['cl','Cl'],['fi','Fi']];
+const at=(d,k)=>clamp(d.r+((d.at&&d.at[k])||0),1,10);
+const hs=s=>{let x=0;for(const c of s)x=(x*31+c.charCodeAt())%997;return x/997};
+function fixD(d){const a=d.a||d.age||28,h=hs(d.n);if(d.pot==null)d.pot=Math.min(10,+(d.r+Math.max(0,25-a)*.15+h*.2).toFixed(1));if(!d.au)d.au=27+Math.round(h*4);if(!d.ap)d.ap=Math.max(a+1+Math.round(h*3),36+Math.round(h*8));if(!d.at){d.at={};ATK.forEach(([k])=>{d.at[k]=+((hs(d.n+k)-.5)*1.6).toFixed(1)})}}
+for(const y in SEASONS)SEASONS[y].forEach(t=>t.d.forEach(fixD));FA.forEach(fixD);
+const dur=w=>`<p class='mu'>Duração dos pneus: ${Object.keys(TY).map(c=>TY[c][0]+' ~'+lf({cp:c},w.temp)+' voltas').join(' · ')}</p>`;
+function evoD(d,res,m){const a=d.a||d.age||28,au=d.au||29,gr=a<au?Math.max(0,(d.pot||d.r)-d.r)*.03+.005:-(a-au+1)*.004;d.r=clamp(d.r+gr+(res-.5)*.05+(m-.5)*.03+rnd(-.02,.02),1,10)}
+function evolve(g,o){o.forEach((c,i)=>{const d=g.grid[c.ti].d[c.j];if(!d)return;const m=d.m==null?.5:d.m,res=c.dnf?.2:i<3?1:i<10?.6:.3;d.m=clamp(m*.7+res*.3,0,1);evoD(d,res,d.m)});g.pool.forEach(d=>evoD(d,.5,.5));if(g.team.t)evoD(g.team.t,.5,.5)}
+function hofUp(g,o,w){const H=g.hf=g.hf||{},h=c=>H[c.n]=H[c.n]||{n:c.n,cc:c.cc,t:0,w:0,p:0,gp:0};o.forEach((c,i)=>{const x=h(c);x.gp++;if(i==0&&!c.dnf)x.w++;if(i<3&&!c.dnf)x.pd=(x.pd||0)+1});const q=w.q[0];h({n:q.d.n,cc:q.d.c}).p++}
+function hofT(g,n){const H=Object.values(g.hf||{}).map(x=>({...x,s:x.t*100+x.w*25+x.p*10+x.gp})).sort((a,b)=>b.s-a.s).slice(0,n);return `<div class='bx'><h4>Hall da Fama</h4><div class='in wrap'><table class='t'><tr><th>#</th><th>Piloto</th><th>Títulos</th><th>Vitórias</th><th>Poles</th><th>GPs</th><th>Pontos</th></tr>${H.map((x,i)=>`<tr><td>${i+1}</td><td>${flag(x.cc)} ${x.n}</td><td>${x.t}</td><td>${x.w}</td><td>${x.p}</td><td>${x.gp}</td><td><b>${x.s}</b></td></tr>`).join('')}</table><p class='mu'>Título 100 · vitória 25 · pole 10 · GP 1</p></div></div>`}
+function vHof(){return hofT(S.g,50)+`<button onclick="S.tab='dash';go('manage')">Voltar</button>`}
+function vRet(){const g=S.g,R=(a,b)=>`<div class='row'><span>${a}</span><b>${b}</b></div>`;return `<div class='bx'><h4>Carreira: ${g.boss}</h4><div class='in'>${R('Equipe',g.team.n)}${R('Temporadas',g.old.length)}${R('Títulos de construtores',g.rec.t)}${R('Títulos de pilotos',g.rec.dt)}${R('Vitórias / Poles',g.rec.w+' / '+g.rec.p)}${g.old.map(o=>R(o.y,o.p+'º')).join('')}</div></div>${hofT(g,10)}<button onclick="S.tab='dash';go('manage')">Voltar ao jogo</button> <button class='p' onclick="go('menu')">Menu</button>`}
+function vDrv(){const g=S.g,rows=[];g.grid.forEach((t,k)=>t.d.forEach((d,j)=>rows.push([d,t,(j+1)+'º piloto',k==g.ti])));if(g.team.t)rows.push([g.team.t,g.team,'Testes',1]);g.pool.forEach(d=>rows.push([d,null,'Sem contrato',0]));rows.sort((a,b)=>b[0].r-a[0].r);
+const ac=v=>`color:hsl(${Math.round((v-4)*22)},70%,36%);font-weight:700`;
+return `<div class='bx'><h4>Pilotos</h4><div class='in wrap'><table class='t'><tr><th>#</th><th>Nome</th><th>Idade</th><th>Equipe</th><th>Status</th>${ATK.map(a=>`<th>${a[1]}</th>`).join('')}<th>Pot</th><th>Auge</th><th>Apos.</th></tr>${rows.map(([d,t,s,me],i)=>`<tr style='${me?'font-weight:700':''}'><td>${i+1}</td><td>${flag(d.c)} ${pl(d)}</td><td>${d.a||d.age||'-'}</td><td style='${t?'background:'+t.bg+';color:'+t.fg:''}'>${t?t.n:'—'}</td><td>${s}</td>${ATK.map(a=>`<td style='${ac(at(d,a[0]))}'>${at(d,a[0]).toFixed(0)}</td>`).join('')}<td><b>${nf(d.pot||d.r)}</b></td><td>${d.au}</td><td>${d.ap}</td></tr>`).join('')}</table></div></div><button onclick="S.tab='dash';go('manage')">Voltar</button> <button class='p' onclick="go('mkt')">Mercado de pilotos</button>`}
+const me=v=>clamp(Math.round((6e4+(v-3)*5e4)/1e4)*1e4,5e4,45e4);
+function engDev(g){if(!g.mc||!g.mc.mfg)return 0;const e=g.eng[g.mc.k];e.el=e.el||e.pw;g.ei=g.ei||{pu:me(e.pw),el:me(e.el)};g.ep2=g.ep2||{...g.ei};let c=0;[['pu','pw'],['el','el']].forEach(([i,p])=>{const v=g.ei[i],m=me(e[p]);let d=clamp((v-m)/m*.12+(v-g.ep2[i])/m*.10,-.3,.3);g.ep2[i]=v;c+=v;e[p]=clamp(e[p]+d,3,10)});return c}
+function engUI(g){if(!g.mc||!g.mc.mfg)return '';const e=g.eng[g.mc.k];e.el=e.el||e.pw;g.ei=g.ei||{pu:me(e.pw),el:me(e.el)};g.ep2=g.ep2||{...g.ei};
+return `<div class='bx'><h4>Desenvolvimento do motor ${e.n}</h4><div class='in'>${[['pu','Unidade de potência',e.pw],['el','Sistema elétrico',e.el]].map(([k,n,v])=>`<div class='row' style='align-items:center'><span>${n}</span><b>${nf(v)}</b><span class='mu'>manter ${me(v)/1000} mil</span><span>$ <input type='number' min='50' max='450' step='10' value='${g.ei[k]/1000}' style='width:72px' onchange="S.g.ei['${k}']=clamp(+this.value*1000,50000,450000);draw()"> mil</span></div>`).join('')}<p class='mu'>Acima do valor de manutenção o motor melhora; abaixo, piora. Até 3 clientes pagam pelo motor a cada temporada.</p></div></div>`}
+function setS(t,v){v=clamp(v,3,10);const d=v-t.s;if(t.cr)for(const k in t.cr)t.cr[k]=clamp(t.cr[k]+d,3,10);t.s=v}
+const pl=d=>`<span style='cursor:pointer;text-decoration:underline' onclick="S.pil=decodeURIComponent('${encodeURIComponent(d.n)}');go('pil')">${d.n}</span>`;
+function mkSched(l,b,dry){const s=Array(l+2).fill(0);if(dry)return s;if(b>0){const e=Math.floor(rnd(.3*l,.8*l));for(let i=0;i<l+2;i++)s[i]=i<e?b:(b==2&&i<e+6?1:0)}else if(Math.random()<.4){const a=Math.floor(rnd(5,l-12)),d=Math.floor(rnd(6,20)),w=Math.random()<.5?1:2;for(let i=a;i<Math.min(l+2,a+d);i++)s[i]=w}return s}
+function fc(R){const s=R.sched,o=[];let st=R.lap||1,v=s[st]||0;for(let i=st+1;i<=R.l+1;i++){const x=i<=R.l?s[i]:-1;if(x!=v){if(v>0)o.push((v==1?'úmida (chuva moderada)':'molhada (muita chuva)')+' da volta '+st+' à '+(i-1));st=i;v=x}}return o.length?'Previsão: pista '+o.join('; pista ')+'.':'Previsão: sem chuva.'}
+const trk=w=>{const R=w.race;return `<b>Volta ${Math.min(R.lap,R.l)}/${R.l}</b><br>${wxh(R.wx)}<p class='mu' style='margin:4px 0'>${fc(R)}</p>`};
+function aiOffers(g){[...g.team.d,g.team.t].forEach(d=>{if(d&&d.yrs<=1&&!d.nx&&!d.off&&g.round>=4&&Math.random()<.2){const k=Math.floor(rnd(0,g.grid.length));if(k==g.ti)return;d.off=g.grid[k].n;g.news.unshift('⚠️ '+g.grid[k].n+' quer '+d.n+' (último ano de contrato). Renove para mantê-lo.');toast('⚠️ '+g.grid[k].n+' fez pré-contrato com '+d.n+'! Renove para mantê-lo.',0)}})}
+function setupHtml(g,w){const r=w.r;return `<div style='text-align:center'><h3><u>GP ${r.gp} - ${r.l} voltas</u> ${flag(r.cc)}</h3></div><div class='cols'>${g.team.d.map((d,i)=>`<div class='bx'><h4>${flag(d.c)} ${d.n}</h4><div class='in'><p>Pneus: ${tyPick(w.rt[i],`S.g.wk.rt[${i}]='#';draw()`)}<br><b>${TY[w.rt[i]][0]} (${TY[w.rt[i]][2]} voltas)</b></p><p>Grid: <b>${w.q.findIndex(x=>x.ti==g.ti&&x.j==i)+1}º lugar</b></p><label><input type='checkbox' ${w.pa[i]?'checked':''} onchange='S.g.wk.pa[${i}]=this.checked'> Pit automático (aviso de pit stop)</label></div></div>`).join('')}</div><button class='p' style='width:100%;padding:16px' onclick="startRace()">Confirmar</button>`}
+function pitAlert(c){const w=S.g.wk,R=w.race;if(w.ph!='race'||R.lap>=R.l)return;if(window._pm){window._pm.remove();window._pm=null}w.paused=true;const pb=document.getElementById('pb');if(pb)pb.textContent='Continuar';const d=document.createElement('div');d.style.cssText='position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:99';
+d.innerHTML=`<div class='bx' style='width:320px;max-width:92vw'><h4 style='text-align:center'>Pit stop!</h4><div class='in'><div class='row'><span><u>Piloto:</u></span><b>${flag(c.cc)} ${c.n}</b></div><div class='row'><span><u>Novos pneus:</u></span><select id='pt'>${Object.keys(TY).map(k=>`<option value='${k}' ${k==nextTy(R.wx,c)?'selected':''}>${TY[k][0]} (${TY[k][2]} voltas)</option>`).join('')}</select></div><div class='row'><span><u>Volta atual:</u></span><b>${R.lap} / ${R.l}</b></div><p class='mu'>Pneu atual: ${TY[c.cp][0]} · vida restante ${Math.max(0,lf(c)-c.age)} voltas</p><button id='pn' style='width:100%;padding:14px;margin:4px 0'>Cancelar ordem ✖</button><button class='p' id='py' style='width:100%;padding:14px'>Confirmar ✔</button></div></div>`;
+document.body.appendChild(d);window._pm=d;const done=p=>{if(p){c.pit=d.querySelector('#pt').value;toast('🔧 Pit confirmado: '+c.n+' entra na próxima volta',1)}else c.nw=R.lap+3;w.paused=false;if(pb)pb.textContent='Pausar';d.remove();if(window._pm===d)window._pm=null};d.querySelector('#py').onclick=()=>done(1);d.querySelector('#pn').onclick=()=>done(0)}
+function vPil(){const g=S.g,n=S.pil;let d,t=null,st='Sem contrato';g.grid.forEach((x,k)=>x.d.forEach((y,j)=>{if(y.n==n){d=y;t=x;st=k==g.ti?(j+1)+'º piloto':'Titular'}}));if(g.team.t&&g.team.t.n==n){d=g.team.t;t=g.team;st='Testes'}if(!d)d=g.pool.find(y=>y.n==n);
+if(!d)return `<button onclick="S.tab='dash';go('manage')">Voltar</button>`;
+const h=(g.hf||{})[n]||{},B=(a,b)=>`<div class='row'><span><u>${a}:</u></span><b>${b}</b></div>`,mine=t&&g.grid.indexOf(t)==g.ti,NM={la:'Largada',co:'Concentração',ul:'Ultrapassagem',ex:'Experiência',ra:'Rapidez',ch:'Chuva',ac:'Acerto do carro',cl:'Classificação',fi:'Físico'};
+return `<div class='bx'><h4 style='font-size:1.2em'>${flag(d.c)} <i>${d.n}</i><span style='float:right'>${t?t.n:'Sem equipe'}</span></h4><div class='in'><div class='cols'><div><div class='bx'><h4>Dados pessoais</h4><div class='in'>${B('Nome',d.n)}${B('País',flag(d.c))}${B('Idade',(d.a||d.age||'-')+' anos')}${B('Potencial',nf(d.pot||d.r))}${B('Auge / Aposent.',d.au+' / '+d.ap)}</div></div><div class='bx'><h4>Carreira (no jogo)</h4><div class='in'>${B('Títulos',h.t||0)}${B('GPs',h.gp||0)}${B('Vitórias',h.w||0)}${B('Poles',h.p||0)}${B('Pódios',h.pd||0)}</div></div></div><div class='bx'><h4>Qualidades</h4><div class='in'>${ATK.map(([k])=>B(NM[k],nf(at(d,k)))).join('')}<p class='mu'>Nota geral: ${nf(d.r)}</p></div></div><div><div class='bx'><h4>Contrato</h4><div class='in'>${B('Equipe',t?t.n:'-')}${B('Salário',d.sal?D(d.sal):'-')}${B('Duração',d.yrs?d.yrs+' ano(s)':'-')}${B('Função',st)}</div></div><div class='bx'><h4>Próximo contrato</h4><div class='in'>${B('Equipe',d.nx?t.n:d.off?'Proposta de '+d.off:'-')}${B('Salário',d.nx?D(d.nx.sal):'-')}${B('Duração',d.nx?d.nx.yrs+' ano(s)':'-')}</div></div>${mine?`<button class='p' style='width:100%' onclick="go('mkt')">Renovar contrato</button>`:''}</div></div></div></div><button onclick="go('drv')">Voltar</button>`}
+function offer(d,role,cb,lock){const RS=['0','1','t'],RN={'0':'1º piloto','1':'2º piloto','t':'Piloto de testes'};
+const o={sal:clamp(Math.round(d.r*12)*10,10,200),yrs:1,ri:Math.max(0,RS.indexOf(String(role)))},el=document.createElement('div');
+el.style.cssText='position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:99';
+const row=(l,v,k,fixed)=>`<div class='row' style='align-items:center'><b>${l}</b><span>${v}</span><span>${fixed?'':`<button data-k='${k}' data-v='1'>▲</button><button data-k='${k}' data-v='-1'>▼</button>`}</span></div>`;
+const paint=()=>{el.innerHTML=`<div class='bx' style='width:350px;max-width:92vw'><h4 style='text-align:center;font-size:1.15em'>Oferta de contrato: ${d.n}</h4><div class='in'>${row('Salário','$ '+o.sal+' mil/temporada','s')}${row('Duração',o.yrs+' ano(s)','y')}${row('Situação',RN[RS[o.ri]],'r',lock)}<button id='ov' style='width:100%;padding:12px;margin:8px 0 6px'>Voltar</button><button class='p' id='op' style='width:100%;padding:12px'>Fazer proposta</button></div></div>`;
+el.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k,v=+b.dataset.v;if(k=='s')o.sal=clamp(o.sal+v*10,10,200);if(k=='y')o.yrs=clamp(o.yrs+v,1,5);if(k=='r')o.ri=(o.ri+v+3)%3;paint()});
+el.querySelector('#ov').onclick=()=>el.remove();el.querySelector('#op').onclick=()=>{el.remove();cb({sal:o.sal*1000,yrs:o.yrs,role:RS[o.ri]})}};
+paint();document.body.appendChild(el)}
+function best2(g){const p=[...g.pool].sort((a,b)=>b.r-a.r)[0];if(!p)return null;g.pool.splice(g.pool.indexOf(p),1);return cl(p)}
+function repl(g,x){if(x.t){const q=x.t;x.t=null;q.yrs=1;return q}return best2(g)}
+function promote(s){const g=S.g,t=g.team;if(!t.t)return alert('Sem piloto reserva para promover.');const o=t.d[s];t.d[s]=t.t;t.t=o;g.news.unshift(t.d[s].n+' foi promovido a '+(s+1)+'º piloto.');toast(t.d[s].n+' promovido a '+(s+1)+'º piloto! '+o.n+' vai para a reserva.',1);save();draw()}
+function renew(i){const g=S.g,t=g.team,d=i==2?t.t:t.d[i];if(!d)return;
+offer(d,i==2?'t':String(i),a=>{const dem=clamp(Math.round(d.r*12)*10,10,200)*1000;
+if(d.r>t.s+3)return alert(d.n+' recusou renovar: prefere uma equipe mais forte.');
+if(a.sal<dem)return alert(d.n+' recusou renovar: quer pelo menos '+D(dem)+' por temporada.');
+d.nx={sal:a.sal,yrs:a.yrs};delete d.off;g.news.unshift(d.n+' renovou por '+a.yrs+' ano(s).');toast(d.n+' aceitou renovar por '+a.yrs+' ano(s)!',1);save();draw()},1)}
+function propose(i){const g=S.g,d=g.pool[i];if(!d)return;
+offer(d,'0',a=>{const dem=clamp(Math.round(d.r*12)*10,10,200)*1000,t=g.team;
+if(d.r>t.s+3)return alert(d.n+' recusou: prefere uma equipe mais forte.');
+if(a.sal<dem)return alert(d.n+' recusou: quer pelo menos '+D(dem)+' por temporada.');
+const nd={...d,sal:a.sal,yrs:a.yrs};let old;if(a.role=='t'){old=t.t;t.t=nd}else{old=t.d[+a.role];t.d[+a.role]=nd}
+g.pool.splice(g.pool.indexOf(d),1);if(old)g.pool.push(old);g.news.unshift(d.n+' assinou por '+a.yrs+' ano(s).');toast(d.n+' aceitou a proposta!',1);save();draw()})}
+function poach(k,j){const g=S.g,x=g.grid[k],d=j=='t'?x.t:x.d[j];if(!d)return;
+offer(d,'0',a=>{const dem=Math.min(2e5,clamp(Math.round(d.r*12)*10,10,200)*1000*1.3);
+if((g.pend||[]).some(p=>p.d.n==d.n))return alert(d.n+' recusou: já tem pré-contrato com você.');
+if(d.r>g.team.s+3)return alert(d.n+' recusou: prefere uma equipe mais forte.');
+if(a.sal<dem)return alert(d.n+' quer pelo menos '+D(dem)+' para deixar '+x.n+'.');
+(g.pend=g.pend||[]).push({k,j,d:{...d},role:a.role,sal:a.sal,yrs:a.yrs});
+g.news.unshift(d.n+' assinou pré-contrato: chega quando o contrato com '+x.n+' acabar (fim da temporada).');
+toast(d.n+' aceitou! Chega ao fim da temporada, quando o contrato com '+x.n+' acabar.',1);save();draw()})}
+function vMkt(){const g=S.g,t=g.team;
+const my=(i,d)=>d?`<tr><td>${['1º','2º','Reserva'][i]}</td><td>${flag(d.c)} ${pl(d)}</td><td>${nf(d.r)}</td><td>${D(d.sal||0)}</td><td>${d.yrs||'-'} ano(s)${d.nx?' → '+d.nx.yrs+'a':''}${d.off?' ⚠️ '+d.off:''}</td><td><button onclick="renew(${i})">Renovar</button>${i==2?` <button onclick="promote(0)">Promover ao 1º</button> <button onclick="promote(1)">Promover ao 2º</button>`:''}</td></tr>`:'';
+const H='<tr><th></th><th>Piloto</th><th>Idade</th><th>Equipe</th><th>Função</th><th>Nota</th><th>Pot.</th><th>Contrato</th><th></th></tr>';
+const fa=g.pool.map((d,i)=>`<tr><td>${flag(d.c)}</td><td>${pl(d)}</td><td>${d.a||d.age||'-'}</td><td>—</td><td>Sem contrato</td><td>${nf(d.r)}</td><td>${nf(d.pot||d.r)}</td><td>livre</td><td><button onclick="propose(${i})">Contratar</button></td></tr>`).join('');
+const ot=g.grid.map((x,k)=>k==g.ti?'':[...x.d.map((d,j)=>[d,j]),...(x.t?[[x.t,'t']]:[])].map(([d,j])=>`<tr style='background:${x.bg}22'><td>${flag(d.c)}</td><td>${pl(d)}</td><td>${d.a||d.age||'-'}</td><td style='background:${x.bg};color:${x.fg}'>${x.n}</td><td>${j=='t'?'Reserva':(j+1)+'º piloto'}</td><td>${nf(d.r)}</td><td>${nf(d.pot||d.r)}</td><td>${d.yrs||1} ano(s)</td><td><button onclick="poach(${k},'${j}')">Negociar</button></td></tr>`).join('')).join('');
+return `<div class='bx'><h4>Meus pilotos</h4><div class='in wrap'><table class='t'><tr><th>Função</th><th>Piloto</th><th>Nota</th><th>Salário/temp.</th><th>Contrato</th><th></th></tr>${my(0,t.d[0])}${my(1,t.d[1])}${my(2,t.t)}</table><p class='mu'>O reserva pode ser promovido a titular (o titular vai para a reserva).</p></div></div><div class='bx'><h4>Pilotos sem contrato</h4><div class='in wrap'><table class='t'>${H}${fa}</table></div></div><div class='bx'><h4>Pilotos de outras equipes (titulares e reservas)</h4><div class='in wrap'><table class='t'>${H}${ot}</table><p class='mu'>Quem tem contrato só chega quando ele acaba. Equipes do jogo também trocam pilotos entre si no fim da temporada.</p></div></div><button onclick="S.tab='dash';go('manage')">Voltar</button>`}
+function initG(g,o){const m=S.season>=2025?TST[o.n]:null;let p=m?{n:m[0],c:m[1],r:m[2],age:26,pot:m[2]}:null;if(p)g.pool=g.pool.filter(x=>x.n!=p.n);else p=g.pool.shift();if(p)g.team.t=cl(p);
+g.grid.forEach((x,k)=>{if(k==g.ti||x.t)return;const q=S.season>=2025?TST[x.n]:null;if(q){g.pool=g.pool.filter(z=>z.n!=q[0]);x.t=cl({n:q[0],c:q[1],r:q[2],age:26,pot:q[2]})}});ensureInv(g)}
+function contracts(g){const t=g.team;
+[0,1,'t'].forEach(k=>{const d=k=='t'?t.t:t.d[k];if(!d)return;const ret=(d.a||d.age||28)>=d.ap;
+if(!ret&&d.nx){d.sal=d.nx.sal;d.yrs=d.nx.yrs;delete d.nx;delete d.off;return}
+if(!ret&&d.yrs>1){d.yrs--;return}
+const k2=!ret&&d.off?g.grid.findIndex(x=>x.n==d.off):-1;
+if(k2>=0&&k2!=g.ti){const x=g.grid[k2],j=Math.floor(rnd(0,2)),o=x.d[j];x.d[j]={...d,yrs:2};delete x.d[j].off;if(o)g.pool.push(o);g.news.unshift(d.n+' deixou sua equipe e assinou com '+x.n+'.')}
+else{g.pool.push(d);g.news.unshift(d.n+(ret?' se aposentou.':' saiu: contrato encerrado.'))}
+if(k=='t')t.t=null;else t.d[k]=repl(g,t)||d});
+if(!t.t)t.t=best2(g);
+(g.pend||[]).forEach(p=>{const x=g.grid[p.k],s=p.j=='t'?x.t:x.d[p.j];if(!s||s.n!=p.d.n)return;
+if(p.j=='t')x.t=null;else x.d[p.j]=repl(g,x)||s;
+const nd={...s,sal:p.sal,yrs:p.yrs};let old;if(p.role=='t'){old=t.t;t.t=nd}else{old=t.d[+p.role];t.d[+p.role]=nd}
+if(old)g.pool.push(old);g.news.unshift(s.n+' chegou à sua equipe.')});
+g.grid.forEach((x,k)=>{if(k==g.ti)return;x.d.forEach((d,j)=>{if(d.yrs>1){d.yrs--;return}
+if((d.a||d.age||28)>=d.ap){const r=repl(g,x);if(r){x.d[j]=r;g.news.unshift(d.n+' se aposentou.');return}}
+if(Math.random()<.3){const k2=Math.floor(rnd(0,g.grid.length));if(k2!=k&&k2!=g.ti){const y=g.grid[k2],j2=Math.floor(rnd(0,2)),e=y.d[j2];if(e){x.d[j]=e;y.d[j2]=d;d.yrs=Math.ceil(rnd(1.5,4));e.yrs=Math.ceil(rnd(1.5,4));g.news.unshift(d.n+' foi para '+y.n+' e '+e.n+' foi para '+x.n+'.');return}}}
+d.yrs=Math.ceil(rnd(1,4))})});
+g.pend=[];[...g.grid.flatMap(x=>x.d),...g.grid.map(x=>x.t),t.t,...g.pool].forEach(d=>{if(d){if(d.a)d.a++;else if(d.age)d.age++}})}
+
+/* ===== Customizar (editor) e escolha de temporada ===== */
+Object.assign(CTRY,{BH:'Bahrein',AZ:'Azerbaijão',EE:'Estônia',IE:'Irlanda',TR:'Turquia',MY:'Malásia'});
+const clone=o=>JSON.parse(JSON.stringify(o));
+const CD={'Albert Park':[50,81],'Xangai':[55,95],'Suzuka':[45,91.5],'Sakhir':[50,95],'Jidá':[60,92],'Miami':[55,91.5],'Gilles Villeneuve':[60,75.5],'Monte Carlo':[25,75],'Barcelona':[55,79],'Red Bull Ring':[60,68.5],'Silverstone':[50,90],'Spa':[62,107],'Hungaroring':[34,80.5],'Zandvoort':[40,73],'Monza':[80,83],'Madring':[50,91],'Baku':[65,105],'Marina Bay':[40,98],'Austin':[50,99],'Hermanos Rodríguez':[60,79.5],'Interlagos':[50,72],'Las Vegas':[75,96],'Lusail':[45,84],'Yas Marina':[55,87.5]};
+CAL.forEach(r=>{const d=CD[r.c];if(r.rt==null)r.rt=d?d[0]:50;if(!r.bt)r.bt=d?d[1]:90});
+const CC=clone(CAL);
+let HFS=[],PTS=[25,18,15,12,10,8,6,4,2,1],DBLd=false;
+try{const c=JSON.parse(localStorage.getItem('pwm_x0'));if(c){if(c.H)HFS=c.H;if(c.R){if(c.R.p)PTS=c.R.p;DBLd=!!c.R.d}}}catch(e){}
+S.dbl=DBLd;
+const hfSeed=()=>Object.fromEntries(HFS.filter(h=>h.n&&h.n.trim()).map(h=>[h.n.trim(),{n:h.n.trim(),cc:h.cc,t:+h.t||0,w:+h.w||0,p:+h.p||0,pd:+h.pd||0,gp:+h.gp||0}]));
+function saveCust(){try{localStorage.setItem('pwm_custom',JSON.stringify({S:SEASONS,E:ENG,C:CC,P:EP,H:HFS,R:{p:PTS,d:DBLd}}));toast('Salvo. Vale para novos jogos.',1)}catch(e){toast('Não foi possível salvar.',0)}}
+function rst(b){if(!b.dataset.c){b.dataset.c=1;b.textContent='Clique de novo para confirmar';setTimeout(()=>{b.dataset.c='';b.textContent='Restaurar padrões'},4000);return}try{localStorage.removeItem('pwm_custom');localStorage.removeItem('pwm_custom2')}catch(e){}location.reload()}
+function cdraw(){const l=document.querySelector('.lst'),st=l?l.scrollTop:0;draw();const n=document.querySelector('.lst');if(n)n.scrollTop=st;const e=document.querySelector('.lst tr.sel');if(e)e.scrollIntoView({block:'nearest'})}
+const nin=(l,v,a,f)=>`<label>${l}<input type="number" ${a} value="${v}" onchange="${f}"></label>`;
+const tin=(l,v,f)=>`<label>${l}<input value="${String(v).replace(/"/g,'&quot;')}" onchange="${f}"></label>`;
+const cSel=(v,js)=>`<select onchange="${js}">${Object.entries(Object.assign({},CTRY,v&&!CTRY[v]?{[v]:v}:{})).sort((a,b)=>a[1].localeCompare(b[1])).map(([c,n])=>`<option value="${c}" ${c==v?'selected':''}>${FL(c)} ${n}</option>`).join('')}</select>`;
+const cFoot=`<p style="margin-top:14px"><button class="dk" onclick="S.cs='hub';draw()">Voltar</button> <button class="p" onclick="saveCust()">Salvar</button></p>`;
+function vCust(){return ({hub:cHub,circ:cCirc,pil:cPil,my:cMy,mot:cMot,eq:cEq,hof:cHof,reg:cReg}[S.cs||'hub']||cHub)()}
+function cHub(){const B=[['circ','Circuitos','Edita circuitos: país, prova, voltas, retas e curvas, tempo base etc.'],['pil','Pilotos','Edita pilotos: nome, país, idade, nota, potencial, auge e qualidades.'],['mot','Motor','Edita motores: nome, país, força e preço.'],['eq','Equipes','Edita equipes: cores, nome, país, força, carro e motor.'],['hof','Hall da Fama','Define os números históricos de pilotos para novos jogos.'],['my','Meu save','Monte sua temporada Personalizada: copie uma real e edite tudo.'],['reg','Regras','Edita a pontuação e o dobro de pontos na última corrida.']];
+return `<div class="hero" style="padding-top:20px"><h1 style="font-size:2.4em;color:var(--ac)">Customizar</h1><div class="chub">${B.map(b=>`<button class="big" data-h="${b[2]}" onmouseover="document.getElementById('ch').textContent=this.dataset.h" onclick="S.cs='${b[0]}';draw()">${b[1]}</button>`).join('')}</div><p id="ch" class="mu" style="min-height:1.5em">Escolha uma área para editar.</p><p><button onclick="go('menu')">Voltar ao menu</button> <button class="p" onclick="saveCust()">Salvar tudo</button> <button onclick="rst(this)">Restaurar padrões</button></p><p class="mu">As mudanças valem para novos jogos. Clique em Salvar para guardá-las no navegador.</p></div>`}
+function cCirc(){const L=SC();S.ci=clamp(S.ci||0,0,L.length-1);const i=S.ci,r=L[i],P=`SC()[${i}]`;
+const rows=L.map((x,k)=>`<tr class="${k==i?'sel':''}" onclick="S.ci=${k};cdraw()"><td>${k+1}</td><td><span class="f">${FL(x.cc)}</span></td><td>${CTRY[x.cc]||x.cc}</td><td>GP ${x.gp}</td><td>${x.c}</td><td>${x.rt}%</td><td>${100-x.rt}%</td><td>${x.l}</td><td>${tm(x.bt)}</td></tr>`).join('');
+return `<h2 style="text-align:center"><u>Circuitos</u></h2>${cYsel()}<div class="lst"><table class="lt"><tr><th>#</th><th></th><th>País</th><th>Prova</th><th>Circuito</th><th>Retas</th><th>Curvas</th><th>Voltas</th><th>Tempo base</th></tr>${rows}</table></div>
+<div class="cbt"><button class="dk" onclick="cAdd()">Adicionar prova</button><button class="dk" ${i==0?'disabled':''} onclick="cMove(-1)">Sobe</button><button class="dk" ${i==L.length-1?'disabled':''} onclick="cMove(1)">Desce</button><button class="dk" ${L.length<2?'disabled':''} onclick="cDel()">Remover prova</button></div>
+<div class="bx"><h4>Editar prova ${i+1}</h4><div class="in ed"><label>País${cSel(r.cc,`${P}.cc=this.value;cdraw()`)}</label>${tin('Prova (GP ...)',r.gp,`${P}.gp=this.value;cdraw()`)}${tin('Circuito',r.c,`${P}.c=this.value;cdraw()`)}${nin('Retas (%)',r.rt,'min="0" max="100"',`${P}.rt=clamp(Math.round(+this.value),0,100);cdraw()`)}${nin('Voltas',r.l,'min="5" max="120"',`${P}.l=clamp(Math.round(+this.value),5,120);cdraw()`)}${tin('Tempo base',tm(r.bt),`cT(${i},this.value)`)}<label>Chuva<select onchange="${P}.dry=+this.value;cdraw()"><option value="0" ${r.dry?'':'selected'}>Pode chover</option><option value="1" ${r.dry?'selected':''}>Nunca chove</option></select></label></div><div class="in mu" style="padding-top:0">Curvas = 100% − retas. As retas definem o traçado (retas, curvas ou misto) e o tempo base é o ritmo de volta da pista.</div></div>${cFoot}`}
+function cAdd(){SC().push({gp:'Nova Prova',c:'Novo Circuito',cc:'BR',l:50,dry:0,rt:50,bt:90});S.ci=SC().length-1;cdraw()}
+function cDel(){if(SC().length<2)return;SC().splice(S.ci,1);S.ci=Math.min(S.ci,SC().length-1);cdraw()}
+function cMove(d){const i=S.ci,j=i+d;if(j<0||j>=SC().length)return;[SC()[i],SC()[j]]=[SC()[j],SC()[i]];S.ci=j;cdraw()}
+function cT(i,v){const s=String(v).trim().replace(',','.'),m=s.match(/^(?:(\d+):)?(\d+(?:\.\d+)?)$/);if(!m){toast('Tempo inválido. Use o formato 1:25.100',0);cdraw();return}SC()[i].bt=clamp((+(m[1]||0))*60+ +m[2],40,200);cdraw()}
+function cPil(){const L=[];SEASONS[CY].forEach((t,ti)=>t.d.forEach((d,j)=>L.push([t,ti,d,j])));S.pi=clamp(S.pi||0,0,L.length-1);const [t,ti,d,j]=L[S.pi],Q=`SEASONS[CY][${ti}].d[${j}]`;
+const NM={la:'Largada',co:'Concentração',ul:'Ultrapassagem',ex:'Experiência',ra:'Rapidez',ch:'Chuva',ac:'Acerto do carro',cl:'Classificação',fi:'Físico'};
+const rows=L.map(([x,xi,y,yj],k)=>`<tr class="${k==S.pi?'sel':''}" onclick="S.pi=${k};cdraw()"><td>${k+1}</td><td><span class="f">${FL(y.c)}</span></td><td>${y.n}</td><td style="background:${x.bg};color:${x.fg}">${x.n}</td><td>${y.a}</td><td>${nf(y.r)}</td><td>${nf(y.pot)}</td><td>${y.au}</td><td>${y.ap}</td></tr>`).join('');
+return `<h2 style="text-align:center"><u>Pilotos</u></h2><p style="text-align:center">Temporada: <select onchange="CY=+this.value;S.pi=0;draw()">${Object.keys(SEASONS).map(y=>`<option ${y==CY?'selected':''}>${y}</option>`).join('')}</select></p><div class="lst"><table class="lt"><tr><th>#</th><th></th><th>Nome</th><th>Equipe</th><th>Idade</th><th>Nota</th><th>Pot.</th><th>Auge</th><th>Apos.</th></tr>${rows}</table></div>
+<div class="bx"><h4>Editar ${d.n}</h4><div class="in ed">${tin('Nome',d.n,`${Q}.n=this.value||'Piloto';cdraw()`)}<label>País${cSel(d.c,`${Q}.c=this.value;cdraw()`)}</label>${nin('Idade',d.a,'min="16" max="60"',`${Q}.a=clamp(Math.round(+this.value),16,60);cdraw()`)}${nin('Nota geral',d.r,'min="1" max="10" step="0.1"',`${Q}.r=clamp(+this.value,1,10);cdraw()`)}${nin('Potencial',d.pot,'min="1" max="10" step="0.1"',`${Q}.pot=clamp(+this.value,1,10);cdraw()`)}${nin('Auge (idade)',d.au,'min="20" max="40"',`${Q}.au=clamp(Math.round(+this.value),20,40);cdraw()`)}${nin('Aposentadoria',d.ap,'min="25" max="55"',`${Q}.ap=clamp(Math.round(+this.value),25,55);cdraw()`)}</div><div class="in ed" style="padding-top:0">${ATK.map(([k])=>nin(NM[k],at(d,k).toFixed(1),'min="1" max="10" step="0.1"',`(${Q}.at=${Q}.at||{})['${k}']=clamp(+this.value,1,10)-${Q}.r;cdraw()`)).join('')}</div><div class="in mu" style="padding-top:0">Ao mudar a nota geral, as qualidades acompanham sozinhas.</div></div>${cFoot}`}
+function cEq(){const L=SEASONS[CY];S.ei=clamp(S.ei||0,0,L.length-1);const t=L[S.ei],Q=`SEASONS[CY][${S.ei}]`;
+const rows=L.map((x,k)=>`<tr class="${k==S.ei?'sel':''}" onclick="S.ei=${k};cdraw()"><td>${k+1}</td><td style="background:${x.bg};color:${x.fg}">${x.n}</td><td><span class="f">${FL(x.c)}</span> ${CTRY[x.c]||x.c}</td><td>${nf(x.s)}</td><td>${ENG[x.e]?ENG[x.e][0]:x.e}</td><td>${x.d.map(d=>d.n).join(', ')}</td></tr>`).join('');
+return `<h2 style="text-align:center"><u>Equipes</u></h2><p style="text-align:center">Temporada: <select onchange="CY=+this.value;S.ei=0;draw()">${Object.keys(SEASONS).map(y=>`<option ${y==CY?'selected':''}>${y}</option>`).join('')}</select></p><div class="lst"><table class="lt"><tr><th>#</th><th>Equipe</th><th>País</th><th>Força</th><th>Motor</th><th>Pilotos</th></tr>${rows}</table></div><div class="cbt"><button class="dk" onclick="tAdd()">Adicionar equipe</button><button class="dk" onclick="tMv(-1)">Sobe</button><button class="dk" onclick="tMv(1)">Desce</button><button class="dk" onclick="tDel()">Remover equipe</button></div>
+<div class="bx"><h4 style="background:${t.bg};color:${t.fg}">Editar ${t.n}</h4><div class="in ed">${tin('Nome (letras e números)',t.n,`${Q}.n=this.value.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,'')||'Equipe';cdraw()`)}<label>País${cSel(t.c,`${Q}.c=this.value;cdraw()`)}</label><label>Cor principal<input type="color" value="${t.bg}" onchange="${Q}.bg=this.value;cdraw()"></label><label>Cor do texto<input type="color" value="${t.fg}" onchange="${Q}.fg=this.value;cdraw()"></label>${nin('Força geral',t.s,'min="3" max="10" step="0.1"',`setS(${Q},+this.value);cdraw()`)}<label>Motor<select onchange="${Q}.e=this.value;cdraw()">${Object.keys(ENG).map(k=>`<option value="${k}" ${t.e==k?'selected':''}>${ENG[k][0]}</option>`).join('')}</select></label><label>Fabricante do motor<select onchange="${Q}.w=this.value=='1';cdraw()"><option value="0" ${t.w?'':'selected'}>Cliente</option><option value="1" ${t.w?'selected':''}>Fabricante</option></select></label></div><div class="in ed" style="padding-top:0">${CARK.map(([k,n])=>nin(n,+((t.cr&&t.cr[k])||t.s).toFixed(1),'min="3" max="10" step="0.1"',`(${Q}.cr=${Q}.cr||{})['${k}']=clamp(+this.value,3,10);cdraw()`)).join('')}</div><div class="in mu" style="padding-top:0">Ao mudar a força geral, os 7 itens do carro acompanham sozinhos.</div></div>${cFoot}`}
+function cMot(){return `<h2 style="text-align:center"><u>Motor</u></h2><div class="bx"><div class="in ed">${Object.keys(ENG).map(k=>`<div class="bx" style="margin:0;box-shadow:none;border:1px solid var(--bd)"><div class="in ed">${tin('Nome',ENG[k][0],`ENG['${k}'][0]=this.value||'Motor'`)}<label>País${cSel(ENG[k][1],`ENG['${k}'][1]=this.value`)}</label>${nin('Força',EP[k][0],'min="1" max="10" step="0.1"',`EP['${k}'][0]=clamp(+this.value,1,10)`)}${nin('Preço por temporada (US$)',EP[k][1],'min="0" step="10000"',`EP['${k}'][1]=Math.max(0,+this.value||0)`)}</div></div>`).join('')}</div></div>${cFoot}`}
+function cHof(){return `<h2 style="text-align:center"><u>Hall da Fama</u></h2><p class="mu" style="text-align:center">Números históricos que entram no Hall da Fama de novos jogos. Se o piloto estiver no grid, os números dele somam com os do jogo.</p><div class="bx"><div class="in wrap"><table class="lt"><tr><th>Piloto</th><th>País</th><th>Títulos</th><th>Vitórias</th><th>Poles</th><th>Pódios</th><th>GPs</th><th></th></tr>${HFS.map((h,i)=>`<tr><td><input value="${String(h.n).replace(/"/g,'&quot;')}" onchange="HFS[${i}].n=this.value"></td><td>${cSel(h.cc,`HFS[${i}].cc=this.value`)}</td>${['t','w','p','pd','gp'].map(k=>`<td><input type="number" min="0" style="width:70px" value="${h[k]||0}" onchange="HFS[${i}].${k}=Math.max(0,Math.round(+this.value||0))"></td>`).join('')}<td><button onclick="HFS.splice(${i},1);draw()">Remover</button></td></tr>`).join('')||'<tr><td colspan="8" class="mu">Nenhum piloto cadastrado.</td></tr>'}</table></div></div><button class="dk" onclick="HFS.push({n:'Novo piloto',cc:'GB',t:0,w:0,p:0,pd:0,gp:0});draw()">Adicionar piloto</button>${cFoot}`}
+function cReg(){return `<h2 style="text-align:center"><u>Regras</u></h2><p class="mu" style="text-align:center">Cada temporada usa a pontuação real do ano (2000–2002: 10-6-4-3-2-1; 2003–2009: 10-8-6-5-4-3-2-1; 2010 em diante: 25-18-15-12-10-8-6-4-2-1). Se você alterar os valores abaixo, a sua pontuação vale para todas as temporadas.</p><div class="bx"><h4>Pontuação por posição</h4><div class="in ed">${PTS.map((p,i)=>nin((i+1)+'º lugar',p,'min="0"',`PTS[${i}]=Math.max(0,Math.round(+this.value||0))`)).join('')}</div></div><div class="bx"><div class="in"><label><input type="checkbox" ${DBLd?'checked':''} onchange="DBLd=this.checked;S.dbl=DBLd"> Dobro de pontos na última corrida (padrão para novos jogos)</label><p class="mu">Você também pode escolher isso ao iniciar um novo jogo.</p></div></div>${cFoot}`}
+function vSeason(){const ks=Object.keys(SEASONS).sort((a,b)=>b-a);return `<div class="bx" style="max-width:380px;margin:40px auto"><h4 style="text-align:center;font-size:1.2em">Escolha da temporada</h4><div class="in"><select id="ss" style="width:100%;padding:10px" onchange="document.getElementById('sn').textContent=SEASONS[this.value].length+' equipes no grid'">${ks.map(y=>`<option value="${y}" ${y==S.season?'selected':''}>Temporada de ${y}</option>`).join('')}</select><p id="sn" class="mu" style="margin:6px 0">${SEASONS[S.season&&SEASONS[S.season]?S.season:ks[0]].length} equipes no grid</p><label style="display:block;margin:10px 0"><input type="checkbox" id="sd" ${S.dbl?'checked':''}> Dobro de pontos na última corrida</label><button class="dk" style="width:100%;margin-bottom:8px" onclick="go('menu')">Voltar <span style="color:#ff4d4d">✖</span></button><button class="dk" style="width:100%" onclick="seasonGo()">Continuar <span style="color:#3ddc84">✔</span></button></div></div>`}
+function seasonGo(){S.season=+document.getElementById('ss').value;S.dbl=document.getElementById('sd').checked;S.pick=null;go('team')}
+
+
+/* ===== Temporadas reais 2000–2026: equipes, motores, calendários e pilotos ===== */
+Object.assign(CTRY,{RU:'Rússia',KR:'Coreia do Sul',IN:'Índia',MY:'Malásia'});
+const CUSTY=2027;
+/* pilotos: nome|país|nascimento|auge (nota máxima) */
+const DRV={};
+`Michael Schumacher|DE|69|9.9
+Rubens Barrichello|BR|72|8.0
+Mika Häkkinen|FI|68|9.3
+David Coulthard|GB|71|8.1
+Ralf Schumacher|DE|75|8.0
+Jenson Button|GB|80|8.5
+Giancarlo Fisichella|IT|73|8.0
+Alexander Wurz|AT|74|7.2
+Jacques Villeneuve|CA|71|8.2
+Ricardo Zonta|BR|76|7.0
+Heinz-Harald Frentzen|DE|67|7.6
+Jarno Trulli|IT|74|8.0
+Jos Verstappen|NL|72|7.0
+Pedro de la Rosa|ES|71|7.4
+Mika Salo|FI|66|7.1
+Pedro Diniz|BR|70|6.6
+Eddie Irvine|GB|65|7.9
+Johnny Herbert|GB|64|7.2
+Jean Alesi|FR|64|7.6
+Nick Heidfeld|DE|77|7.9
+Marc Gené|ES|74|6.9
+Gastón Mazzacane|AR|75|6.4
+Juan Pablo Montoya|CO|75|8.9
+Olivier Panis|FR|66|7.3
+Kimi Räikkönen|FI|79|9.4
+Luciano Burti|BR|75|6.7
+Enrique Bernoldi|BR|78|6.6
+Fernando Alonso|ES|81|9.7
+Tarso Marques|BR|76|6.3
+Felipe Massa|BR|81|8.6
+Takuma Sato|JP|77|7.4
+Mark Webber|AU|76|8.3
+Alex Yoong|MY|76|6.0
+Allan McNish|GB|70|7.0
+Ralph Firman|IE|75|6.5
+Antônio Pizzonia|BR|80|7.0
+Justin Wilson|GB|78|6.8
+Cristiano da Matta|BR|73|7.4
+Giorgio Pantano|IT|79|6.8
+Gianmaria Bruni|IT|81|6.7
+Zsolt Baumgartner|HU|81|6.3
+Christian Klien|AT|83|7.0
+Tiago Monteiro|PT|76|6.8
+Narain Karthikeyan|IN|77|6.6
+Christijan Albers|NL|79|6.9
+Patrick Friesacher|AT|80|6.3
+Nico Rosberg|DE|85|8.6
+Vitantonio Liuzzi|IT|80|7.0
+Scott Speed|US|83|6.5
+Anthony Davidson|GB|79|6.9
+Sakon Yamamoto|JP|82|6.2
+Robert Kubica|PL|84|8.9
+Adrian Sutil|DE|83|7.5
+Lewis Hamilton|GB|85|9.8
+Heikki Kovalainen|FI|81|7.6
+Nelson Piquet Jr.|BR|85|7.0
+Kazuki Nakajima|JP|85|7.0
+Timo Glock|DE|82|7.5
+Sébastien Bourdais|FR|79|7.6
+Sebastian Vettel|DE|87|9.5
+Sébastien Buemi|CH|88|7.5
+Jaime Alguersuari|ES|90|7.3
+Bruno Senna|BR|83|7.2
+Karun Chandhok|IN|84|6.5
+Kamui Kobayashi|JP|86|7.6
+Vitaly Petrov|RU|84|7.4
+Nico Hülkenberg|DE|87|8.1
+Lucas di Grassi|BR|84|7.0
+Paul di Resta|GB|86|7.5
+Sergio Pérez|MX|90|8.2
+Pastor Maldonado|VE|85|7.4
+Jean-Éric Vergne|FR|90|7.3
+Daniel Ricciardo|AU|89|8.6
+Romain Grosjean|FR|86|7.9
+Jérôme d'Ambrosio|BE|85|6.8
+Charles Pic|FR|90|6.9
+Giedo van der Garde|NL|85|6.8
+Max Chilton|GB|91|6.5
+Jules Bianchi|FR|89|7.5
+Esteban Gutiérrez|MX|91|7.0
+Valtteri Bottas|FI|89|8.4
+Kevin Magnussen|DK|92|7.5
+Daniil Kvyat|RU|94|7.6
+Marcus Ericsson|SE|90|6.8
+Felipe Nasr|BR|92|6.9
+Max Verstappen|NL|97|9.8
+Carlos Sainz|ES|94|8.5
+Will Stevens|GB|91|6.4
+Roberto Merhi|ES|91|6.4
+Rio Haryanto|ID|93|6.0
+Pascal Wehrlein|DE|94|7.2
+Esteban Ocon|FR|96|8.0
+Jolyon Palmer|GB|91|6.8
+Stoffel Vandoorne|BE|92|7.4
+Lance Stroll|CA|98|7.0
+Charles Leclerc|MC|97|9.3
+Brendon Hartley|NZ|89|6.9
+Sergey Sirotkin|RU|95|6.9
+Pierre Gasly|FR|96|8.0
+Lando Norris|GB|99|9.2
+Alex Albon|TH|96|7.9
+George Russell|GB|98|8.9
+Nicholas Latifi|CA|95|6.7
+Antonio Giovinazzi|IT|93|7.2
+Mick Schumacher|DE|99|7.2
+Nikita Mazepin|RU|99|6.5
+Yuki Tsunoda|JP|00|7.8
+Zhou Guanyu|CN|99|7.1
+Nyck de Vries|NL|95|7.2
+Logan Sargeant|US|00|6.7
+Oscar Piastri|AU|01|9.0
+Liam Lawson|NZ|02|7.6
+Franco Colapinto|AR|03|7.4
+Oliver Bearman|GB|05|7.8
+Kimi Antonelli|IT|06|8.5
+Isack Hadjar|FR|04|7.8
+Gabriel Bortoleto|BR|04|7.6
+Arvid Lindblad|GB|07|7.2
+Jack Doohan|AU|03|7.0`.split('\n').forEach(l=>{const a=l.split('|'),b=+a[2];DRV[a[0]]={c:a[1],b:b<20?2000+b:1900+b,p:+a[3]}});
+const drvR=(n,y)=>{const d=DRV[n],a=y-d.b;return +clamp(d.p-.13*Math.max(0,27-a)-.12*Math.max(0,a-33),5.5,10).toFixed(1)};
+const mkDrv=(n,y)=>{const d=DRV[n];if(!d)throw new Error('piloto sem cadastro: '+n);const o={n,c:d.c,r:drvR(n,y),a:y-d.b,pot:d.p};fixD(o);return o};
+/* equipes: chave|nome|país */
+const TMS={};
+`FER|Ferrari|IT
+MCL|McLaren|GB
+WIL|Williams|GB
+BEN|Benetton|IT
+BAR|BAR|GB
+JOR|Jordan|IE
+ARR|Arrows|GB
+SAU|Sauber|CH
+JAG|Jaguar|GB
+PRO|Prost|FR
+MIN|Minardi|IT
+REN|Renault|FR
+TOY|Toyota|JP
+RBR|Red Bull|AT
+STR|Toro Rosso|IT
+MID|Midland|GB
+SAG|Super Aguri|JP
+BMW|BMW Sauber|DE
+HON|Honda|JP
+SPY|Spyker|NL
+FIN|Force India|IN
+BRA|Brawn|GB
+MER|Mercedes|GB
+LOT|Lotus|GB
+LTL|Team Lotus|MY
+VIR|Virgin|GB
+HRT|HRT|ES
+MAR|Marussia|RU
+CAT|Caterham|MY
+MAN|Manor|GB
+HAA|Haas|US
+RPT|Racing Point|GB
+ALF|Alfa Romeo|CH
+ATA|AlphaTauri|IT
+ALP|Alpine|FR
+AST|Aston Martin|GB
+RB|RB|IT
+KSA|Kick Sauber|CH`.split('\n').forEach(l=>{const a=l.split('|');TMS[a[0]]=[a[1],a[2]]});
+const LIVf=(k,y)=>{const R=(a,b)=>[a,b];switch(k){
+case'FER':return R('#dc0000','#fff');
+case'MCL':return y<=2016?R('#aeb3b9','#111'):y<=2019?R('#ff8700','#111'):R('#ff8000','#1a0d00');
+case'WIL':return y<=2013?R('#0b4ea2','#fff'):y<=2018?R('#eef2f8','#0b3d91'):y<=2020?R('#1b2a4a','#fff'):y==2021?R('#00a0de','#fff'):R('#005aff','#fff');
+case'BEN':return R('#2b9fd8','#fff');case'BAR':case'HON':return R('#f2f2f2','#c8102e');case'BRA':return R('#d7ff3b','#111');
+case'TOY':return R('#e50d23','#fff');case'JOR':return y<=2004?R('#ffd500','#111'):R('#d62a1e','#fff');
+case'MID':return R('#c22b1c','#fff');case'SPY':return R('#f58220','#111');
+case'FIN':return y<=2009?R('#ff9a1a','#111'):y<=2013?R('#2f7d4f','#fff'):y<=2015?R('#f58d1f','#111'):R('#f7a1cf','#111');
+case'RPT':return R('#f596c8','#111');case'AST':return R('#006f62','#fff');case'ARR':return R('#ff7a00','#111');
+case'SAU':return y<=2005?R('#3f4f78','#fff'):y<=2013?R('#2a2d34','#fff'):y<=2017?R('#2d4f9b','#fff'):R('#1d3c8c','#fff');
+case'BMW':return R('#f3f5f8','#0a3d91');case'ALF':return R('#9b0b1b','#fff');case'KSA':return R('#52e252','#062006');
+case'JAG':return R('#0f6b45','#fff');case'PRO':return R('#1f55a8','#fff');case'MIN':return R('#1b1b1b','#ffd500');
+case'RBR':return R('#1e41ff','#fff');case'STR':return R('#1f3a93','#fff');case'ATA':return R('#1f2a44','#fff');case'RB':return R('#6692ff','#0a1633');
+case'REN':return y<=2004?R('#f6c700','#111'):y<=2006?R('#1f66c9','#ffd400'):y<=2009?R('#f7d117','#111'):y==2010?R('#1b1b1b','#f7d117'):R('#ffd800','#111');
+case'ALP':return R('#0093cc','#fff');case'LOT':return R('#1a1a1a','#c8a24b');case'LTL':case'CAT':return R('#0b6b3a','#ffd500');
+case'VIR':return R('#c4121b','#fff');case'HRT':return R('#3a3a3a','#fff');case'MAR':return R('#1a1a1a','#e8112d');case'MAN':return R('#0a2b5c','#fff');
+case'HAA':return R('#b6babd','#111');case'SAG':return R('#e8e8e8','#c8102e');
+case'MER':return y<=2013?R('#aab2b8','#111'):R('#00d2be','#06201d');
+}return R('#555','#fff')};
+const EN={mer:['Mercedes','GB'],fer:['Ferrari','IT'],ren:['Renault','FR'],hon:['Honda','JP'],bmw:['BMW','DE'],toy:['Toyota','JP'],cos:['Cosworth','GB'],pet:['Petronas','MY'],mug:['Mugen-Honda','JP'],sup:['Supertec','GB'],asi:['Asiatech','FR'],peu:['Peugeot','FR'],ply:['Playlife','FR'],rbf:['Red Bull Ford','AT'],aud:['Audi','DE']};
+const engName=(k,y)=>k=='hon'&&y>=2022&&y<=2024?'Honda RBPT':EN[k][0];
+/* temporadas 2000–2024: equipes na ordem do campeonato de construtores | motor (! = equipe fabricante) | pilotos */
+const HD={
+2000:`FER|fer!|Michael Schumacher,Rubens Barrichello
+MCL|mer|Mika Häkkinen,David Coulthard
+WIL|bmw|Ralf Schumacher,Jenson Button
+BEN|ply!|Giancarlo Fisichella,Alexander Wurz
+BAR|hon|Jacques Villeneuve,Ricardo Zonta
+JOR|mug|Heinz-Harald Frentzen,Jarno Trulli
+ARR|sup|Jos Verstappen,Pedro de la Rosa
+SAU|pet|Mika Salo,Pedro Diniz
+JAG|cos|Eddie Irvine,Johnny Herbert
+PRO|peu|Jean Alesi,Nick Heidfeld
+MIN|cos|Marc Gené,Gastón Mazzacane`,
+2001:`FER|fer!|Michael Schumacher,Rubens Barrichello
+MCL|mer|Mika Häkkinen,David Coulthard
+WIL|bmw|Ralf Schumacher,Juan Pablo Montoya
+SAU|pet|Kimi Räikkönen,Nick Heidfeld
+JOR|hon|Jarno Trulli,Heinz-Harald Frentzen
+BAR|hon|Jacques Villeneuve,Olivier Panis
+BEN|ren!|Giancarlo Fisichella,Jenson Button
+JAG|cos|Eddie Irvine,Pedro de la Rosa
+PRO|fer|Jean Alesi,Luciano Burti
+ARR|asi|Jos Verstappen,Enrique Bernoldi
+MIN|cos|Fernando Alonso,Tarso Marques`,
+2002:`FER|fer!|Michael Schumacher,Rubens Barrichello
+WIL|bmw|Ralf Schumacher,Juan Pablo Montoya
+MCL|mer|David Coulthard,Kimi Räikkönen
+REN|ren!|Jarno Trulli,Jenson Button
+SAU|pet|Nick Heidfeld,Felipe Massa
+JOR|hon|Giancarlo Fisichella,Takuma Sato
+JAG|cos|Eddie Irvine,Pedro de la Rosa
+BAR|hon|Jacques Villeneuve,Olivier Panis
+MIN|asi|Mark Webber,Alex Yoong
+TOY|toy!|Mika Salo,Allan McNish
+ARR|cos|Heinz-Harald Frentzen,Enrique Bernoldi`,
+2003:`FER|fer!|Michael Schumacher,Rubens Barrichello
+WIL|bmw|Juan Pablo Montoya,Ralf Schumacher
+MCL|mer|Kimi Räikkönen,David Coulthard
+REN|ren!|Fernando Alonso,Jarno Trulli
+BAR|hon|Jenson Button,Jacques Villeneuve
+SAU|pet|Nick Heidfeld,Heinz-Harald Frentzen
+JAG|cos|Mark Webber,Antônio Pizzonia
+TOY|toy!|Cristiano da Matta,Olivier Panis
+JOR|cos|Giancarlo Fisichella,Ralph Firman
+MIN|cos|Jos Verstappen,Justin Wilson`,
+2004:`FER|fer!|Michael Schumacher,Rubens Barrichello
+BAR|hon|Jenson Button,Takuma Sato
+REN|ren!|Fernando Alonso,Jarno Trulli
+WIL|bmw|Juan Pablo Montoya,Ralf Schumacher
+MCL|mer|Kimi Räikkönen,David Coulthard
+SAU|pet|Giancarlo Fisichella,Felipe Massa
+JAG|cos|Mark Webber,Christian Klien
+TOY|toy!|Cristiano da Matta,Olivier Panis
+JOR|cos|Nick Heidfeld,Giorgio Pantano
+MIN|cos|Gianmaria Bruni,Zsolt Baumgartner`,
+2005:`REN|ren!|Fernando Alonso,Giancarlo Fisichella
+MCL|mer|Kimi Räikkönen,Juan Pablo Montoya
+FER|fer!|Michael Schumacher,Rubens Barrichello
+TOY|toy!|Jarno Trulli,Ralf Schumacher
+WIL|bmw|Mark Webber,Nick Heidfeld
+BAR|hon|Jenson Button,Takuma Sato
+RBR|cos|David Coulthard,Christian Klien
+SAU|pet|Jacques Villeneuve,Felipe Massa
+JOR|toy|Tiago Monteiro,Narain Karthikeyan
+MIN|cos|Christijan Albers,Patrick Friesacher`,
+2006:`REN|ren!|Fernando Alonso,Giancarlo Fisichella
+FER|fer!|Michael Schumacher,Felipe Massa
+MCL|mer|Kimi Räikkönen,Juan Pablo Montoya
+HON|hon!|Rubens Barrichello,Jenson Button
+BMW|bmw!|Nick Heidfeld,Jacques Villeneuve
+TOY|toy!|Ralf Schumacher,Jarno Trulli
+RBR|fer|David Coulthard,Christian Klien
+WIL|cos|Mark Webber,Nico Rosberg
+STR|cos|Vitantonio Liuzzi,Scott Speed
+MID|toy|Christijan Albers,Tiago Monteiro
+SAG|hon|Takuma Sato,Sakon Yamamoto`,
+2007:`MCL|mer|Fernando Alonso,Lewis Hamilton
+FER|fer!|Felipe Massa,Kimi Räikkönen
+BMW|bmw!|Nick Heidfeld,Robert Kubica
+REN|ren!|Giancarlo Fisichella,Heikki Kovalainen
+WIL|toy|Nico Rosberg,Alexander Wurz
+RBR|ren|David Coulthard,Mark Webber
+TOY|toy!|Ralf Schumacher,Jarno Trulli
+STR|fer|Vitantonio Liuzzi,Scott Speed
+HON|hon!|Jenson Button,Rubens Barrichello
+SAG|hon|Takuma Sato,Anthony Davidson
+SPY|fer|Adrian Sutil,Christijan Albers`,
+2008:`FER|fer!|Kimi Räikkönen,Felipe Massa
+MCL|mer|Lewis Hamilton,Heikki Kovalainen
+BMW|bmw!|Nick Heidfeld,Robert Kubica
+REN|ren!|Fernando Alonso,Nelson Piquet Jr.
+TOY|toy!|Jarno Trulli,Timo Glock
+STR|fer|Sébastien Bourdais,Sebastian Vettel
+RBR|ren|David Coulthard,Mark Webber
+WIL|toy|Nico Rosberg,Kazuki Nakajima
+HON|hon!|Jenson Button,Rubens Barrichello
+FIN|fer|Adrian Sutil,Giancarlo Fisichella
+SAG|hon|Takuma Sato,Anthony Davidson`,
+2009:`BRA|mer|Jenson Button,Rubens Barrichello
+RBR|ren|Mark Webber,Sebastian Vettel
+MCL|mer|Lewis Hamilton,Heikki Kovalainen
+FER|fer!|Kimi Räikkönen,Felipe Massa
+TOY|toy!|Jarno Trulli,Timo Glock
+BMW|bmw!|Robert Kubica,Nick Heidfeld
+WIL|toy|Nico Rosberg,Kazuki Nakajima
+REN|ren!|Fernando Alonso,Nelson Piquet Jr.
+FIN|mer|Adrian Sutil,Giancarlo Fisichella
+STR|fer|Sébastien Buemi,Sébastien Bourdais`,
+2010:`RBR|ren|Sebastian Vettel,Mark Webber
+MCL|mer|Jenson Button,Lewis Hamilton
+FER|fer!|Felipe Massa,Fernando Alonso
+MER|mer!|Michael Schumacher,Nico Rosberg
+REN|ren!|Robert Kubica,Vitaly Petrov
+WIL|cos|Rubens Barrichello,Nico Hülkenberg
+FIN|mer|Adrian Sutil,Vitantonio Liuzzi
+SAU|fer|Kamui Kobayashi,Pedro de la Rosa
+STR|fer|Sébastien Buemi,Jaime Alguersuari
+LTL|cos|Jarno Trulli,Heikki Kovalainen
+HRT|cos|Bruno Senna,Karun Chandhok
+VIR|cos|Timo Glock,Lucas di Grassi`,
+2011:`RBR|ren|Sebastian Vettel,Mark Webber
+MCL|mer|Lewis Hamilton,Jenson Button
+FER|fer!|Fernando Alonso,Felipe Massa
+MER|mer!|Michael Schumacher,Nico Rosberg
+REN|ren!|Vitaly Petrov,Nick Heidfeld
+FIN|mer|Adrian Sutil,Paul di Resta
+SAU|fer|Kamui Kobayashi,Sergio Pérez
+STR|fer|Sébastien Buemi,Jaime Alguersuari
+WIL|cos|Rubens Barrichello,Pastor Maldonado
+LTL|ren|Heikki Kovalainen,Jarno Trulli
+HRT|cos|Vitantonio Liuzzi,Daniel Ricciardo
+VIR|cos|Timo Glock,Jérôme d'Ambrosio`,
+2012:`RBR|ren|Sebastian Vettel,Mark Webber
+FER|fer!|Fernando Alonso,Felipe Massa
+MCL|mer|Lewis Hamilton,Jenson Button
+LOT|ren|Kimi Räikkönen,Romain Grosjean
+MER|mer!|Michael Schumacher,Nico Rosberg
+SAU|fer|Kamui Kobayashi,Sergio Pérez
+FIN|mer|Nico Hülkenberg,Paul di Resta
+WIL|ren|Pastor Maldonado,Bruno Senna
+STR|fer|Jean-Éric Vergne,Daniel Ricciardo
+CAT|ren|Heikki Kovalainen,Vitaly Petrov
+MAR|cos|Timo Glock,Charles Pic
+HRT|cos|Pedro de la Rosa,Narain Karthikeyan`,
+2013:`RBR|ren|Sebastian Vettel,Mark Webber
+MER|mer!|Nico Rosberg,Lewis Hamilton
+FER|fer!|Fernando Alonso,Felipe Massa
+LOT|ren|Kimi Räikkönen,Romain Grosjean
+MCL|mer|Jenson Button,Sergio Pérez
+FIN|mer|Adrian Sutil,Paul di Resta
+SAU|fer|Nico Hülkenberg,Esteban Gutiérrez
+STR|fer|Daniel Ricciardo,Jean-Éric Vergne
+WIL|ren|Pastor Maldonado,Valtteri Bottas
+MAR|cos|Jules Bianchi,Max Chilton
+CAT|ren|Charles Pic,Giedo van der Garde`,
+2014:`MER|mer!|Lewis Hamilton,Nico Rosberg
+RBR|ren|Sebastian Vettel,Daniel Ricciardo
+WIL|mer|Felipe Massa,Valtteri Bottas
+FER|fer!|Fernando Alonso,Kimi Räikkönen
+MCL|mer|Jenson Button,Kevin Magnussen
+FIN|mer|Nico Hülkenberg,Sergio Pérez
+STR|ren|Jean-Éric Vergne,Daniil Kvyat
+LOT|ren|Romain Grosjean,Pastor Maldonado
+MAR|fer|Max Chilton,Jules Bianchi
+SAU|fer|Esteban Gutiérrez,Adrian Sutil
+CAT|ren|Marcus Ericsson,Kamui Kobayashi`,
+2015:`MER|mer!|Lewis Hamilton,Nico Rosberg
+FER|fer!|Sebastian Vettel,Kimi Räikkönen
+WIL|mer|Felipe Massa,Valtteri Bottas
+RBR|ren|Daniel Ricciardo,Daniil Kvyat
+FIN|mer|Sergio Pérez,Nico Hülkenberg
+LOT|mer|Romain Grosjean,Pastor Maldonado
+STR|ren|Max Verstappen,Carlos Sainz
+SAU|fer|Marcus Ericsson,Felipe Nasr
+MCL|hon|Fernando Alonso,Jenson Button
+MAR|fer|Will Stevens,Roberto Merhi`,
+2016:`MER|mer!|Lewis Hamilton,Nico Rosberg
+RBR|ren|Daniel Ricciardo,Max Verstappen
+FER|fer!|Sebastian Vettel,Kimi Räikkönen
+FIN|mer|Sergio Pérez,Nico Hülkenberg
+WIL|mer|Felipe Massa,Valtteri Bottas
+MCL|hon|Fernando Alonso,Jenson Button
+STR|fer|Carlos Sainz,Daniil Kvyat
+HAA|fer|Romain Grosjean,Esteban Gutiérrez
+REN|ren!|Kevin Magnussen,Jolyon Palmer
+SAU|fer|Marcus Ericsson,Felipe Nasr
+MAN|mer|Pascal Wehrlein,Rio Haryanto`,
+2017:`MER|mer!|Lewis Hamilton,Valtteri Bottas
+FER|fer!|Sebastian Vettel,Kimi Räikkönen
+RBR|ren|Daniel Ricciardo,Max Verstappen
+FIN|mer|Sergio Pérez,Esteban Ocon
+WIL|mer|Lance Stroll,Felipe Massa
+REN|ren!|Nico Hülkenberg,Jolyon Palmer
+STR|ren|Carlos Sainz,Daniil Kvyat
+HAA|fer|Romain Grosjean,Kevin Magnussen
+MCL|hon|Stoffel Vandoorne,Fernando Alonso
+SAU|fer|Marcus Ericsson,Pascal Wehrlein`,
+2018:`MER|mer!|Lewis Hamilton,Valtteri Bottas
+FER|fer!|Sebastian Vettel,Kimi Räikkönen
+RBR|ren|Daniel Ricciardo,Max Verstappen
+REN|ren!|Nico Hülkenberg,Carlos Sainz
+HAA|fer|Romain Grosjean,Kevin Magnussen
+MCL|ren|Stoffel Vandoorne,Fernando Alonso
+FIN|mer|Sergio Pérez,Esteban Ocon
+SAU|fer|Marcus Ericsson,Charles Leclerc
+STR|hon|Pierre Gasly,Brendon Hartley
+WIL|mer|Lance Stroll,Sergey Sirotkin`,
+2019:`MER|mer!|Lewis Hamilton,Valtteri Bottas
+FER|fer!|Sebastian Vettel,Charles Leclerc
+RBR|hon|Max Verstappen,Pierre Gasly
+MCL|ren|Lando Norris,Carlos Sainz
+REN|ren!|Daniel Ricciardo,Nico Hülkenberg
+STR|hon|Daniil Kvyat,Alex Albon
+RPT|mer|Sergio Pérez,Lance Stroll
+ALF|fer|Kimi Räikkönen,Antonio Giovinazzi
+HAA|fer|Kevin Magnussen,Romain Grosjean
+WIL|mer|George Russell,Robert Kubica`,
+2020:`MER|mer!|Lewis Hamilton,Valtteri Bottas
+RBR|hon|Max Verstappen,Alex Albon
+MCL|ren|Lando Norris,Carlos Sainz
+RPT|mer|Sergio Pérez,Lance Stroll
+REN|ren!|Daniel Ricciardo,Esteban Ocon
+FER|fer!|Charles Leclerc,Sebastian Vettel
+ATA|hon|Pierre Gasly,Daniil Kvyat
+ALF|fer|Kimi Räikkönen,Antonio Giovinazzi
+HAA|fer|Kevin Magnussen,Romain Grosjean
+WIL|mer|George Russell,Nicholas Latifi`,
+2021:`MER|mer!|Lewis Hamilton,Valtteri Bottas
+RBR|hon|Max Verstappen,Sergio Pérez
+FER|fer!|Charles Leclerc,Carlos Sainz
+MCL|mer|Lando Norris,Daniel Ricciardo
+ALP|ren!|Fernando Alonso,Esteban Ocon
+ATA|hon|Pierre Gasly,Yuki Tsunoda
+AST|mer|Sebastian Vettel,Lance Stroll
+WIL|mer|George Russell,Nicholas Latifi
+ALF|fer|Kimi Räikkönen,Antonio Giovinazzi
+HAA|fer|Mick Schumacher,Nikita Mazepin`,
+2022:`RBR|hon|Max Verstappen,Sergio Pérez
+FER|fer!|Charles Leclerc,Carlos Sainz
+MER|mer!|Lewis Hamilton,George Russell
+ALP|ren!|Fernando Alonso,Esteban Ocon
+MCL|mer|Lando Norris,Daniel Ricciardo
+ALF|fer|Valtteri Bottas,Zhou Guanyu
+AST|mer|Sebastian Vettel,Lance Stroll
+HAA|fer|Kevin Magnussen,Mick Schumacher
+ATA|hon|Pierre Gasly,Yuki Tsunoda
+WIL|mer|Alex Albon,Nicholas Latifi`,
+2023:`RBR|hon|Max Verstappen,Sergio Pérez
+MER|mer!|Lewis Hamilton,George Russell
+FER|fer!|Charles Leclerc,Carlos Sainz
+MCL|mer|Lando Norris,Oscar Piastri
+AST|mer|Fernando Alonso,Lance Stroll
+ALP|ren!|Pierre Gasly,Esteban Ocon
+WIL|mer|Alex Albon,Logan Sargeant
+ATA|hon|Yuki Tsunoda,Nyck de Vries
+ALF|fer|Valtteri Bottas,Zhou Guanyu
+HAA|fer|Nico Hülkenberg,Kevin Magnussen`,
+2024:`MCL|mer|Lando Norris,Oscar Piastri
+FER|fer!|Charles Leclerc,Carlos Sainz
+RBR|hon|Max Verstappen,Sergio Pérez
+MER|mer!|Lewis Hamilton,George Russell
+AST|mer|Fernando Alonso,Lance Stroll
+ALP|ren!|Pierre Gasly,Esteban Ocon
+HAA|fer|Nico Hülkenberg,Kevin Magnussen
+RB|hon|Yuki Tsunoda,Daniel Ricciardo
+WIL|mer|Alex Albon,Franco Colapinto
+KSA|fer|Valtteri Bottas,Zhou Guanyu`};
+/* circuitos: código|circuito|país|voltas|nunca chove|retas%|tempo base|nome padrão da prova */
+const CT={};
+`AU|Albert Park|AU|58|0|50|81|Austrália
+MY|Sepang|MY|56|0|55|96|Malásia
+BR|Interlagos|BR|71|0|50|72|Brasil
+IM|Imola|IT|63|0|35|80|San Marino
+ES|Barcelona|ES|66|0|55|79|Espanha
+AT|Red Bull Ring|AT|71|0|60|68.5|Áustria
+AA|A1-Ring|AT|71|0|60|70|Áustria
+MC|Monte Carlo|MC|78|0|25|75|Mônaco
+CA|Gilles Villeneuve|CA|70|0|60|75.5|Canadá
+NU|Nürburgring|DE|60|0|45|92|Europa
+GB|Silverstone|GB|52|0|50|90|Grã-Bretanha
+MG|Magny-Cours|FR|70|0|40|78|França
+HO|Hockenheim|DE|67|0|60|74|Alemanha
+HU|Hungaroring|HU|70|0|34|80.5|Hungria
+BE|Spa|BE|44|0|62|107|Bélgica
+IT|Monza|IT|53|0|80|83|Itália
+US|Indianápolis|US|73|0|45|73|EUA
+JP|Suzuka|JP|53|0|45|91.5|Japão
+BH|Sakhir|BH|57|1|50|95|Bahrein
+CN|Xangai|CN|56|0|55|95|China
+TR|Istanbul Park|TR|58|0|45|87|Turquia
+VA|Valência|ES|57|0|50|99|Europa
+FU|Fuji|JP|67|0|50|78|Japão
+SG|Marina Bay|SG|62|0|40|98|Singapura
+YM|Yas Marina|AE|58|1|55|87.5|Abu Dhabi
+KR|Yeongam|KR|55|0|55|98|Coreia do Sul
+IN|Buddh|IN|60|0|60|88|Índia
+AC|Austin|US|56|0|50|99|EUA
+RU|Sochi|RU|53|0|55|96|Rússia
+BK|Baku|AZ|51|0|65|105|Azerbaijão
+MX|Hermanos Rodríguez|MX|71|0|60|79.5|México
+RI|Paul Ricard|FR|53|0|55|93|França
+PT|Algarve|PT|66|0|50|82|Portugal
+MU|Mugello|IT|59|0|45|78|Toscana
+SO|Sakhir (externo)|BH|87|1|70|55|Sakhir
+ZV|Zandvoort|NL|72|0|40|73|Países Baixos
+JD|Jidá|SA|50|1|60|92|Arábia Saudita
+MI|Miami|US|57|0|55|91.5|Miami
+LV|Las Vegas|US|50|0|75|96|Las Vegas
+LU|Lusail|QA|57|1|45|84|Catar
+MA|Madring|ES|57|0|50|91|Madri`.split('\n').forEach(l=>{const a=l.split('|');CT[a[0]]={c:a[1],cc:a[2],l:+a[3],dry:+a[4],rt:+a[5],bt:+a[6],gp:a[7]}});
+const CALD={
+2000:'AU BR IM GB ES NU MC CA MG AA HO HU BE IT US JP MY',
+2001:'AU MY BR IM ES AA MC CA NU MG GB HO HU BE IT US JP',
+2002:'AU MY BR IM ES AA MC CA NU GB MG HO HU BE IT US JP',
+2003:'AU MY BR IM ES AA MC CA NU MG GB HO HU IT US JP',
+2004:'AU MY BH IM ES MC NU CA US MG GB HO HU BE IT CN JP BR',
+2005:'AU MY BH IM ES MC NU CA US MG GB HO HU TR IT BE BR JP CN',
+2006:'BH MY AU IM NU ES MC GB CA US MG HO HU TR IT CN JP BR',
+2007:'AU MY BH ES MC CA US MG GB NU HU TR IT BE FU CN BR',
+2008:'AU MY BH ES TR MC CA MG GB HO HU VA BE IT SG FU CN BR',
+2009:'AU MY CN BH ES MC TR GB Alemanha:NU HU VA BE IT SG JP BR YM',
+2010:'BH AU MY CN ES MC TR CA VA GB HO HU BE IT SG JP KR BR YM',
+2011:'AU MY CN TR ES MC CA VA GB Alemanha:NU HU BE IT SG JP KR IN YM BR',
+2012:'AU MY CN BH ES MC CA VA GB HO HU BE IT SG JP KR IN YM AC BR',
+2013:'AU MY CN BH ES MC CA GB Alemanha:NU HU BE IT SG KR JP IN YM AC BR',
+2014:'AU MY BH CN ES MC CA AT GB HO HU BE IT SG JP RU AC BR YM',
+2015:'AU MY CN BH ES MC CA AT GB HU BE IT SG JP RU AC MX BR YM',
+2016:'AU BH CN RU ES MC CA Europa:BK AT GB HU HO BE IT SG MY JP AC MX BR YM',
+2017:'AU CN BH RU ES MC CA BK AT GB HU BE IT SG MY JP AC MX BR YM',
+2018:'AU BH CN BK ES MC CA RI AT GB HO HU BE IT SG RU JP AC MX BR YM',
+2019:'AU BH CN BK ES MC CA RI AT GB HO HU BE IT SG RU JP MX AC BR YM',
+2020:'AT Estíria:AT HU GB 70º_Aniversário:GB ES BE IT MU RU Eifel:NU PT Emília-Romanha:IM TR BH SO YM',
+2021:'BH Emília-Romanha:IM PT ES MC BK RI Estíria:AT AT GB HU BE ZV IT RU TR AC MX BR LU JD YM',
+2022:'BH JD AU Emília-Romanha:IM MI ES MC BK CA GB AT RI HU BE ZV IT SG JP AC MX BR YM',
+2023:'BH JD AU BK MI MC ES CA AT GB HU BE ZV IT SG JP LU AC MX BR LV YM',
+2024:'BH JD AU JP CN MI Emília-Romanha:IM MC CA ES AT GB HU BE ZV IT BK SG AC MX BR LV LU YM',
+2025:'AU CN JP BH JD MI Emília-Romanha:IM MC ES CA AT GB BE HU ZV IT BK SG AC MX BR LV LU YM',
+2026:'AU CN JP MI CA MC Barcelona:ES AT GB BE HU ZV IT MA BK Bahrein_(Sepang):MY SG AC MX BR LV LU YM'};
+const SCAL={},SENG={};
+for(const y in CALD)SCAL[y]=CALD[y].split(' ').map(tk=>{const m=tk.match(/^(.*):([A-Z]{2})$/),k=m?m[2]:tk,ci=CT[k];if(!ci)throw new Error('circuito? '+tk+' em '+y);return{gp:m?m[1].replace(/_/g,' '):ci.gp,c:ci.c,cc:ci.cc,l:ci.l,dry:ci.dry,rt:ci.rt,bt:ci.bt}});
+/* 2025 e 2026: mantém as escalações já cadastradas, corrige a ordem e define os fabricantes */
+{const o25=['McLaren','Mercedes','Red Bull','Ferrari','Williams','Racing Bulls','Aston Martin','Haas','Sauber','Alpine'];
+SEASONS[2025]=o25.map(n=>SEASONS[2025].find(t=>t.n==n));
+const w25={Ferrari:1,Mercedes:1,Alpine:1},w26={Mercedes:1,Ferrari:1,'Red Bull':1,Audi:1,'Aston Martin':1};
+SEASONS[2025].forEach(t=>{t.w=!!w25[t.n]});SEASONS[2026].forEach(t=>{t.w=!!w26[t.n]});
+SENG[2025]={mer:{e:['Mercedes','GB'],p:[9,2e6]},fer:{e:['Ferrari','IT'],p:[8,1.9e6]},hon:{e:['Honda','JP'],p:[5,2e5]},ren:{e:['Renault','FR'],p:[3,1.5e5]}};
+SENG[2026]={mer:{e:['Mercedes','GB'],p:[9,2e6]},fer:{e:['Ferrari','IT'],p:[8,1.9e6]},rbf:{e:['Red Bull Ford','AT'],p:[8,1.9e6]},aud:{e:['Audi','DE'],p:[7,9e5]},hon:{e:['Honda','JP'],p:[5,2e5]}}}
+const setStr=y=>{const n=SEASONS[y].length,st=Math.min(.55,6.3/Math.max(1,n-1));SEASONS[y].forEach((t,i)=>t.s=+Math.max(3,9.5-i*st).toFixed(1))};
+const priceOf=pw=>Math.round(1.5e5*Math.pow(1.5,pw-3)/1e4)*1e4;
+for(const y in HD){SEASONS[y]=HD[y].split('\n').map(l=>{const a=l.split('|'),k=a[0],[n,c]=TMS[k],[bg,fg]=LIVf(k,+y);return{n,c,bg,fg,e:a[1].replace('!',''),w:a[1].endsWith('!'),d:a[2].split(',').map(x=>mkDrv(x,+y))}});setStr(y);
+const g={};SEASONS[y].forEach(t=>(g[t.e]=g[t.e]||[]).push(t.s));SENG[y]={};for(const k in g){const mx=Math.max(...g[k]),av=g[k].reduce((p,q)=>p+q,0)/g[k].length,pw=+clamp(mx*.6+av*.4-.3,3,10).toFixed(1);SENG[y][k]={e:[engName(k,+y),EN[k][1]],p:[pw,priceOf(pw)]}}}
+setStr(2025);setStr(2026);
+/* temporada Personalizada (editável por completo na Customizar) */
+SEASONS[CUSTY]=clone(SEASONS[2026]);SCAL[CUSTY]=clone(SCAL[2026]);SENG[CUSTY]=clone(SENG[2026]);
+/* estreias: pilotos que aparecem no banco de dados a partir do primeiro ano em que correm */
+const DEB={};for(let y=2000;y<=2026;y++)(SEASONS[y]||[]).forEach(t=>t.d.forEach(d=>{if(DRV[d.n]&&!DEB[d.n])DEB[d.n]=y}));
+function poolFor(y){if(y>=2025)return FA.map(x=>({...x}));
+const L=Object.keys(DEB).filter(n=>DEB[n]>y&&DEB[n]<=y+3&&y-DRV[n].b>=16).sort((a,b)=>DRV[b].p-DRV[a].p).slice(0,10).map(n=>{const d=mkDrv(n,y);d.age=d.a;return d});
+const G=[['Jean Pilote','FR'],['Marco Rossi','IT'],['Hans Weber','DE'],['Tom Walker','GB'],['Diego Ramos','BR'],['Luis Cano','ES']].slice(0,Math.max(0,6-L.length)).map((x,i)=>{const d={n:x[0],c:x[1],age:22+i,a:22+i,r:6.2+i*.1,pot:7+i*.2};fixD(d);return d});return [...L,...G]}
+function loadSeasonEng(y){for(const k of Object.keys(ENG))delete ENG[k];for(const k of Object.keys(EP))delete EP[k];const s=SENG[y]||SENG[2026];for(const k in s){ENG[k]=s[k].e;EP[k]=s[k].p}if(ENG.mer)ENG.mer[2]=1}
+function addEng(g,y){const s=SENG[y];if(!s)return;for(const k in s){if(!g.eng[k])g.eng[k]={n:s[k].e[0],c:s[k].e[1],pw:s[k].p[0],pr:s[k].p[1]}}
+for(const k of Object.keys(g.eng)){if(!s[k]&&k!='own'&&!(g.mc&&g.mc.k==k))delete g.eng[k]}}
+const _ns=nextSeason;nextSeason=function(){_ns();const g=S.g,y=g.season;if(SCAL[y]){CAL.splice(0,CAL.length,...clone(SCAL[y]));g.cal=clone(CAL)}addEng(g,y);save();draw()};
+const _st=start;start=function(n){loadSeasonEng(S.season);return _st(n)};
+/* customização com salvamento apenas do que foi alterado */
+const DEFJ={S:{},C:{},E:{}};for(const y in SEASONS)DEFJ.S[y]=JSON.stringify(SEASONS[y]);for(const y in SCAL)DEFJ.C[y]=JSON.stringify(SCAL[y]);for(const y in SENG)DEFJ.E[y]=JSON.stringify(SENG[y]);
+try{const c=JSON.parse(localStorage.getItem('pwm_custom2'));if(c){for(const y in c.S)SEASONS[y]=c.S[y];for(const y in c.C)SCAL[y]=c.C[y];for(const y in c.E)SENG[y]=c.E[y];if(c.H)HFS=c.H;if(c.R){if(c.R.p)PTS=c.R.p;DBLd=!!c.R.d;S.dbl=DBLd}}}catch(e){}
+function saveCust(){try{const o={S:{},C:{},E:{},H:HFS,R:{p:PTS,d:DBLd}};for(const y in SEASONS)if(JSON.stringify(SEASONS[y])!=DEFJ.S[y])o.S[y]=SEASONS[y];for(const y in SCAL)if(JSON.stringify(SCAL[y])!=DEFJ.C[y])o.C[y]=SCAL[y];for(const y in SENG)if(JSON.stringify(SENG[y])!=DEFJ.E[y])o.E[y]=SENG[y];localStorage.setItem('pwm_custom2',JSON.stringify(o));toast('Salvo. Vale para novos jogos.',1)}catch(e){toast('Não foi possível salvar.',0)}}
+const SC=()=>SCAL[CY]||(SCAL[CY]=[]);
+const _vc=vCust;vCust=function(){loadSeasonEng(CY);return _vc()};
+const cYsel=()=>`<p style="text-align:center">Temporada: <select onchange="CY=+this.value;S.ci=0;S.ei=0;S.pi=0;draw()">${Object.keys(SEASONS).sort((a,b)=>b-a).map(y=>`<option value="${y}" ${y==CY?'selected':''}>${y}${y==CUSTY?' (Personalizada)':''}</option>`).join('')}</select></p>`;
+function tAdd(){const L=SEASONS[CY],ks=Object.keys(ENG),d=[0,1].map(i=>{const o={n:'Piloto '+(L.length*2+i+1),c:'BR',r:6.5,a:24,pot:7.5};fixD(o);return o});L.push({n:'Nova Equipe '+(L.length+1),c:'BR',bg:'#d6001c',fg:'#ffffff',e:ks[0]||'mer',w:false,s:4,d});S.ei=L.length-1;cdraw()}
+function tDel(){const L=SEASONS[CY];if(L.length<=4){toast('O grid precisa de pelo menos 4 equipes.',0);return}L.splice(S.ei,1);S.ei=Math.min(S.ei,L.length-1);cdraw()}
+function tMv(d){const L=SEASONS[CY],i=S.ei,j=i+d;if(j<0||j>=L.length)return;[L[i],L[j]]=[L[j],L[i]];S.ei=j;cdraw()}
+function mAdd(){const s=SENG[CY]=SENG[CY]||{};let k='m1',n=1;while(s[k])k='m'+(++n);s[k]={e:['Novo Motor '+n,'GB'],p:[6,5e5]};cdraw()}
+function mDel(k){const s=SENG[CY];if(Object.keys(s).length<2){toast('Mantenha pelo menos um motor.',0);return}delete s[k];const f=Object.keys(s)[0];SEASONS[CY].forEach(t=>{if(t.e==k){t.e=f;t.w=false}});cdraw()}
+function cMot(){loadSeasonEng(CY);return `<h2 style="text-align:center"><u>Motor</u></h2>${cYsel()}<div class="bx"><div class="in ed">${Object.keys(ENG).map(k=>`<div class="bx" style="margin:0;box-shadow:none;border:1px solid var(--bd)"><div class="in ed">${tin('Nome',ENG[k][0],`ENG['${k}'][0]=this.value||'Motor'`)}<label>País${cSel(ENG[k][1],`ENG['${k}'][1]=this.value`)}</label>${nin('Força',EP[k][0],'min="1" max="10" step="0.1"',`EP['${k}'][0]=clamp(+this.value,1,10)`)}${nin('Preço por temporada (US$)',EP[k][1],'min="0" step="10000"',`EP['${k}'][1]=Math.max(0,+this.value||0)`)}<button class="dk" onclick="mDel('${k}')">Remover motor</button></div></div>`).join('')}</div></div><div class="cbt"><button class="dk" onclick="mAdd()">Adicionar motor</button></div>${cFoot}`}
+function cMy(){return `<h2 style="text-align:center"><u>Meu save</u></h2><div class="bx"><div class="in"><p>A temporada <b>${CUSTY} (Personalizada)</b> é o seu save: você monta o grid, as cores, os pilotos, os motores e o calendário do jeito que quiser. Ela aparece na escolha de temporada.</p><label>Copiar uma temporada real como ponto de partida<br><select id="myb" style="width:100%;padding:8px">${Object.keys(SEASONS).filter(y=>y!=CUSTY).sort((a,b)=>b-a).map(y=>`<option>${y}</option>`).join('')}</select></label><p><button class="p" onclick="cMyCopy()">Copiar para ${CUSTY}</button> <button class="dk" onclick="CY=${CUSTY};S.cs='eq';S.ei=0;draw()">Editar equipes</button> <button class="dk" onclick="CY=${CUSTY};S.cs='pil';S.pi=0;draw()">Editar pilotos</button> <button class="dk" onclick="CY=${CUSTY};S.cs='circ';S.ci=0;draw()">Editar calendário</button> <button class="dk" onclick="CY=${CUSTY};S.cs='mot';draw()">Editar motores</button></p><p class="mu">Em Equipes você pode adicionar e remover equipes. Depois de editar, clique em Salvar.</p></div></div>${cFoot}`}
+function cMyCopy(){const y=+document.getElementById('myb').value;SEASONS[CUSTY]=clone(SEASONS[y]);SCAL[CUSTY]=clone(SCAL[y]);SENG[CUSTY]=clone(SENG[y]);toast('Temporada '+y+' copiada para a Personalizada.',1)}
+function seasonInfo(y){const s=SENG[y]||{};return (y==CUSTY?'Personalizada · ':'')+SEASONS[y].length+' equipes · '+(SCAL[y]||[]).length+' corridas · Motores: '+Object.values(s).map(e=>e.e[0]).join(', ')}
+function vSeason(){const ks=Object.keys(SEASONS).sort((a,b)=>b-a),y0=S.season&&SEASONS[S.season]?S.season:2026;return `<div class="bx" style="max-width:380px;margin:40px auto"><h4 style="text-align:center;font-size:1.2em">Escolha da temporada</h4><div class="in"><select id="ss" style="width:100%;padding:10px" onchange="document.getElementById('sn').textContent=seasonInfo(this.value)">${ks.map(y=>`<option value="${y}" ${y==y0?'selected':''}>${y==CUSTY?'Personalizada ('+y+')':'Temporada de '+y}</option>`).join('')}</select><p id="sn" class="mu" style="margin:6px 0">${seasonInfo(y0)}</p><label style="display:block;margin:10px 0"><input type="checkbox" id="sd" ${S.dbl?'checked':''}> Dobro de pontos na última corrida</label><button class="dk" style="width:100%;margin-bottom:8px" onclick="go('menu')">Voltar <span style="color:#ff4d4d">✖</span></button><button class="dk" style="width:100%" onclick="seasonGo()">Continuar <span style="color:#3ddc84">✔</span></button></div></div>`}
+function seasonGo(){S.season=+document.getElementById('ss').value;S.dbl=document.getElementById('sd').checked;S.pick=null;loadSeasonEng(S.season);go('team');mobHint()}
+function mobHint(){let m=false;try{m=matchMedia('(pointer:coarse)').matches&&(innerWidth<900||innerHeight>innerWidth)}catch(e){}if(!m||window._mh)return;window._mh=1;const el=document.createElement('div');el.style.cssText='position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:99;padding:16px';el.innerHTML="<div class='bx' style='max-width:360px'><h4 style='text-align:center'>Dica para o celular</h4><div class='in'><p>Para uma experiência melhor, ative o <b>modo Desktop</b> (Site para computador) nas opções do navegador e use o celular <b>na horizontal</b>.</p><button class='p' style='width:100%;padding:12px' id='mhok'>Entendi</button></div></div>";el.querySelector('#mhok').onclick=()=>el.remove();document.body.appendChild(el)}
+const DEFPTS=[25,18,15,12,10,8,6,4,2,1];
+function ptsFor(y){if(JSON.stringify(PTS)!=JSON.stringify(DEFPTS))return PTS;y=+y;return y<=2002?[10,6,4,3,2,1]:y<=2009?[10,8,6,5,4,3,2,1]:DEFPTS}
+const _si=seasonInfo;seasonInfo=function(y){const p=ptsFor(y);return _si(y)+' · Pontos: '+p.join('-')+(y==2014?' · dobro na última (como em 2014)':'')};
+const _vs=vSeason;vSeason=function(){const o=_vs();return o.replace("onchange=\"document.getElementById('sn').textContent=seasonInfo(this.value)\"","onchange=\"document.getElementById('sn').textContent=seasonInfo(this.value);document.getElementById('sd').checked=(this.value==2014)\"")};
+loadSeasonEng(2026);
+
+const BGI={menu:"data:image/svg+xml;utf8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%201920%201080%22%20preserveAspectRatio=%22xMidYMid%20slice%22%3E%3Cdefs%3E%0A%3ClinearGradient%20id=%22a%22%20x1=%220%22%20y1=%220%22%20x2=%220%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%230c1226%22/%3E%3Cstop%20offset=%22.45%22%20stop-color=%22%233a2f5a%22/%3E%3Cstop%20offset=%22.62%22%20stop-color=%22%23e8602c%22/%3E%3Cstop%20offset=%22.64%22%20stop-color=%22%2314161c%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%2307080b%22/%3E%3C/linearGradient%3E%0A%3CradialGradient%20id=%22g%22%20cx=%22.5%22%20cy=%22.6%22%20r=%22.5%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%23ffb25a%22%20stop-opacity=%22.9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23ffb25a%22%20stop-opacity=%220%22/%3E%3C/radialGradient%3E%0A%3ClinearGradient%20id=%22t%22%20x1=%220%22%20y1=%220%22%20x2=%220%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%23262932%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23101216%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%3Crect%20width=%221920%22%20height=%221080%22%20fill=%22url(%23a)%22/%3E%3Cellipse%20cx=%22960%22%20cy=%22660%22%20rx=%22900%22%20ry=%22260%22%20fill=%22url(%23g)%22/%3E%0A%3Cg%20fill=%22%230a0c12%22%3E%3Cpath%20d=%22M0%20690%20L180%20640%20L330%20668%20L520%20610%20L700%20660%20L900%20630%20L1100%20662%20L1320%20618%20L1500%20660%20L1700%20626%20L1920%20670%20L1920%20700%20L0%20700Z%22/%3E%3C/g%3E%0A%3Cpolygon%20points=%22930,690%20990,690%201920,1080%200,1080%22%20fill=%22url(%23t)%22/%3E%0A%3Cpolygon%20points=%22930,690%20920,690%20-60,1080%20-330,1080%22%20fill=%22%2314161c%22/%3E%3Cpolygon%20points=%22990,690%201000,690%201980,1080%202250,1080%22%20fill=%22%2314161c%22/%3E%0A%3Cg%20stroke-width=%2214%22%3E%3Cpath%20d=%22M930%20690%20L0%201080%22%20stroke=%22%23e10600%22%20stroke-dasharray=%2260%2060%22%20opacity=%22.9%22/%3E%3Cpath%20d=%22M930%20690%20L0%201080%22%20stroke=%22%23fff%22%20stroke-dasharray=%2260%2060%22%20stroke-dashoffset=%2260%22%20opacity=%22.9%22/%3E%0A%3Cpath%20d=%22M990%20690%20L1920%201080%22%20stroke=%22%23e10600%22%20stroke-dasharray=%2260%2060%22%20opacity=%22.9%22/%3E%3Cpath%20d=%22M990%20690%20L1920%201080%22%20stroke=%22%23fff%22%20stroke-dasharray=%2260%2060%22%20stroke-dashoffset=%2260%22%20opacity=%22.9%22/%3E%3C/g%3E%0A%3Cpath%20d=%22M960%20690%20L960%201080%22%20stroke=%22%23f5f5f5%22%20stroke-width=%2210%22%20stroke-dasharray=%2240%2070%22%20opacity=%22.55%22/%3E%0A%3Cg%20fill=%22%23fff%22%20opacity=%22.13%22%3E%3Crect%20x=%22120%22%20y=%22300%22%20width=%22520%22%20height=%223%22/%3E%3Crect%20x=%22260%22%20y=%22360%22%20width=%22380%22%20height=%222%22/%3E%3Crect%20x=%221300%22%20y=%22330%22%20width=%22560%22%20height=%223%22/%3E%3Crect%20x=%221450%22%20y=%22400%22%20width=%22400%22%20height=%222%22/%3E%3C/g%3E%0A%3C/svg%3E",season:"data:image/svg+xml;utf8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%201920%201080%22%20preserveAspectRatio=%22xMidYMid%20slice%22%3E%3Cdefs%3E%0A%3ClinearGradient%20id=%22a%22%20x1=%220%22%20y1=%220%22%20x2=%220%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%2305060a%22/%3E%3Cstop%20offset=%22.4%22%20stop-color=%22%23171a22%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%232a2d36%22/%3E%3C/linearGradient%3E%0A%3CradialGradient%20id=%22r%22%20cx=%22.5%22%20cy=%22.5%22%20r=%22.5%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%23ff2a1a%22%20stop-opacity=%22.8%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23ff2a1a%22%20stop-opacity=%220%22/%3E%3C/radialGradient%3E%3C/defs%3E%0A%3Crect%20width=%221920%22%20height=%221080%22%20fill=%22url(%23a)%22/%3E%0A%3Crect%20x=%22260%22%20y=%22120%22%20width=%221400%22%20height=%22120%22%20rx=%2218%22%20fill=%22%230b0c10%22/%3E%0A%3Cg%3E%3Ccircle%20cx=%22560%22%20cy=%22180%22%20r=%22130%22%20fill=%22url(%23r)%22/%3E%3Ccircle%20cx=%22760%22%20cy=%22180%22%20r=%22130%22%20fill=%22url(%23r)%22/%3E%3Ccircle%20cx=%22960%22%20cy=%22180%22%20r=%22130%22%20fill=%22url(%23r)%22/%3E%3Ccircle%20cx=%221160%22%20cy=%22180%22%20r=%22130%22%20fill=%22url(%23r)%22/%3E%3Ccircle%20cx=%221360%22%20cy=%22180%22%20r=%22130%22%20fill=%22url(%23r)%22/%3E%3C/g%3E%0A%3Cg%20fill=%22%23ff3322%22%3E%3Ccircle%20cx=%22560%22%20cy=%22180%22%20r=%2238%22/%3E%3Ccircle%20cx=%22760%22%20cy=%22180%22%20r=%2238%22/%3E%3Ccircle%20cx=%22960%22%20cy=%22180%22%20r=%2238%22/%3E%3Ccircle%20cx=%221160%22%20cy=%22180%22%20r=%2238%22/%3E%3Ccircle%20cx=%221360%22%20cy=%22180%22%20r=%2238%22/%3E%3C/g%3E%0A%3Cg%20fill=%22%23ffb3a8%22%20opacity=%22.7%22%3E%3Ccircle%20cx=%22548%22%20cy=%22168%22%20r=%2210%22/%3E%3Ccircle%20cx=%22748%22%20cy=%22168%22%20r=%2210%22/%3E%3Ccircle%20cx=%22948%22%20cy=%22168%22%20r=%2210%22/%3E%3Ccircle%20cx=%221148%22%20cy=%22168%22%20r=%2210%22/%3E%3Ccircle%20cx=%221348%22%20cy=%22168%22%20r=%2210%22/%3E%3C/g%3E%0A%3Cg%20fill=%22%230b0c10%22%3E%3Crect%20x=%22380%22%20y=%22240%22%20width=%2214%22%20height=%22140%22/%3E%3Crect%20x=%221526%22%20y=%22240%22%20width=%2214%22%20height=%22140%22/%3E%3C/g%3E%0A%3Cg%20fill=%22none%22%20stroke=%22%23f2f2f2%22%20stroke-width=%227%22%20opacity=%22.85%22%3E%0A%3Cpolygon%20points=%22560,470%20760,470%20800,560%20520,560%22%20transform=%22translate(0,0)%22/%3E%3Cpolygon%20points=%221160,470%201360,470%201400,560%201120,560%22/%3E%0A%3Cpolygon%20points=%22500,640%20780,640%20840,760%20430,760%22/%3E%3Cpolygon%20points=%221140,640%201420,640%201490,760%201080,760%22/%3E%0A%3Cpolygon%20points=%22400,860%20770,860%20860,1020%20280,1020%22/%3E%3Cpolygon%20points=%221150,860%201520,860%201640,1020%201060,1020%22/%3E%3C/g%3E%0A%3Cpath%20d=%22M960%20400%20L960%201080%22%20stroke=%22%23f2f2f2%22%20stroke-width=%2210%22%20stroke-dasharray=%2250%2060%22%20opacity=%22.45%22/%3E%0A%3Crect%20x=%220%22%20y=%22380%22%20width=%221920%22%20height=%226%22%20fill=%22%23f2f2f2%22%20opacity=%22.5%22/%3E%0A%3Cg%20fill=%22%23fff%22%20opacity=%22.05%22%3E%3Crect%20x=%220%22%20y=%22430%22%20width=%221920%22%20height=%224%22/%3E%3Crect%20x=%220%22%20y=%22560%22%20width=%221920%22%20height=%223%22/%3E%3C/g%3E%0A%3C/svg%3E",cust:"data:image/svg+xml;utf8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%201920%201080%22%20preserveAspectRatio=%22xMidYMid%20slice%22%3E%3Cdefs%3E%0A%3Cpattern%20id=%22p%22%20width=%2260%22%20height=%2260%22%20patternUnits=%22userSpaceOnUse%22%3E%3Cpath%20d=%22M60%200H0V60%22%20fill=%22none%22%20stroke=%22%237fb4ff%22%20stroke-opacity=%22.12%22%20stroke-width=%221.5%22/%3E%3C/pattern%3E%0A%3Cpattern%20id=%22q%22%20width=%22300%22%20height=%22300%22%20patternUnits=%22userSpaceOnUse%22%3E%3Cpath%20d=%22M300%200H0V300%22%20fill=%22none%22%20stroke=%22%237fb4ff%22%20stroke-opacity=%22.22%22%20stroke-width=%222%22/%3E%3C/pattern%3E%0A%3ClinearGradient%20id=%22b%22%20x1=%220%22%20y1=%220%22%20x2=%221%22%20y2=%221%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%23081c36%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%230d3560%22/%3E%3C/linearGradient%3E%3C/defs%3E%0A%3Crect%20width=%221920%22%20height=%221080%22%20fill=%22url(%23b)%22/%3E%3Crect%20width=%221920%22%20height=%221080%22%20fill=%22url(%23p)%22/%3E%3Crect%20width=%221920%22%20height=%221080%22%20fill=%22url(%23q)%22/%3E%0A%3Cg%20fill=%22none%22%20stroke=%22%239cc8ff%22%20stroke-width=%224%22%20stroke-linejoin=%22round%22%20stroke-linecap=%22round%22%20transform=%22translate(1210%20790)%20scale(.95)%20translate(-480%20-270)%22%20opacity=%22.55%22%3E%0A%3Cpath%20d=%22M80%20270%20L210%20250%20L330%20232%20L420%20205%20L560%20198%20L640%20214%20L760%20222%20L860%20240%20L860%20300%20L760%20318%20L640%20326%20L560%20342%20L420%20335%20L330%20308%20L210%20290Z%22/%3E%0A%3Cpath%20d=%22M420%20205%20L440%20150%20L520%20150%20L560%20198%20M420%20335%20L440%20390%20L520%20390%20L560%20342%22/%3E%0A%3Crect%20x=%2260%22%20y=%22215%22%20width=%2230%22%20height=%22110%22%20rx=%224%22/%3E%3Crect%20x=%22835%22%20y=%22190%22%20width=%2240%22%20height=%22160%22%20rx=%224%22/%3E%0A%3Crect%20x=%22345%22%20y=%22120%22%20width=%22105%22%20height=%2260%22%20rx=%2210%22/%3E%3Crect%20x=%22345%22%20y=%22360%22%20width=%22105%22%20height=%2260%22%20rx=%2210%22/%3E%3Crect%20x=%22640%22%20y=%22110%22%20width=%22120%22%20height=%2270%22%20rx=%2210%22/%3E%3Crect%20x=%22640%22%20y=%22360%22%20width=%22120%22%20height=%2270%22%20rx=%2210%22/%3E%0A%3Cpath%20d=%22M470%20245%20q50%2025%200%2050%20q-30%20-25%200%20-50Z%22/%3E%3Cpath%20d=%22M600%20262%20L760%20262%20M600%20278%20L760%20278%22%20/%3E%3C/g%3E%0A%3Cg%20stroke=%22%239cc8ff%22%20stroke-opacity=%22.5%22%20stroke-width=%222%22%20fill=%22none%22%3E%3Cpath%20d=%22M780%201010%20H1640%20M780%20995%20V1025%20M1640%20995%20V1025%22/%3E%3Cpath%20d=%22M1500%20120%20V520%20M1485%20120%20H1515%20M1485%20520%20H1515%22/%3E%3C/g%3E%0A%3Cg%20fill=%22%239cc8ff%22%20fill-opacity=%22.55%22%20font-family=%22monospace%22%20font-size=%2226%22%3E%3Ctext%20x=%221160%22%20y=%221000%22%3E3600%20mm%3C/text%3E%3Ctext%20x=%221530%22%20y=%22330%22%3E2000%20mm%3C/text%3E%3C/g%3E%0A%3C/svg%3E"};
+const _dw=draw;draw=function(){_dw();const k=S.screen=='menu'?'menu':S.screen=='cust'?'cust':S.screen=='season'?'season':null;if(k){document.body.dataset.bg=k;document.body.style.setProperty('--img','url("'+BGI[k]+'")')}else delete document.body.dataset.bg};
+draw();
+</script></body></html>
